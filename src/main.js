@@ -280,7 +280,7 @@ new Array(FILM_LIST_COUNT).fill(``).forEach(() => render(filmListContainer, crea
 
 render(filmList, createShowMoreButtonTemplate(), `beforeend`);
 
-for (let i = 0; i < 2; i++) {
+for (let i = 0; i < FILM_LIST_EXTRA_COUNT; i++) {
   const filmExtraElement = filmListExtraTemplate[i].querySelector(`.films-list__container`);
   new Array(FILM_LIST_EXTRA_COUNT).fill(``).forEach(() => render(filmExtraElement, createFilmCardElement(), `beforeend`));
 }
