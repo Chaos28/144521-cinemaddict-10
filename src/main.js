@@ -282,9 +282,10 @@ const filmCardTemplates = new Array(FilmList.COUNT).fill(``).map(createFilmCardE
 const filmCardExtraTemplates = new Array(FilmList.EXTRA_COUNT).fill(``).map(createFilmCardETemplate).join(``);
 
 render(filmListContainerElement, filmCardTemplates, `beforeend`);
-render(filmListElement, createShowMoreButtonTemplate(), `beforeend`);
 
 filmListExtraElement.forEach((item) => {
   const ExtraElement = item.querySelector(`.films-list__container`);
   render(ExtraElement, filmCardExtraTemplates, `beforeend`);
 });
+
+render(filmListElement, createShowMoreButtonTemplate(), `beforeend`);
