@@ -1,19 +1,15 @@
-import {createFilmListTemplate} from './components/films.js';
-import {createNavigationListTemplate} from './components/navigation.js';
+import {createFilmListTemplate} from './components/films';
+import {createNavigationListTemplate} from './components/navigation';
 import {createSortFilmTemplate} from './components/sort.js';
-import {createFilmCardETemplate} from './components/film-card.js';
-// import {createPopUpFilmCardTemplate} from './components/popup.js';
-import {createShowMoreButtonTemplate} from './components/show-more-button.js';
-import {createProfileRatingTemplate} from './components/profile-rating.js';
-
+import {createFilmCardETemplate} from './components/film-card';
+// import {createPopUpFilmCardTemplate} from './components/popup';
+import {createShowMoreButtonTemplate} from './components/show-more-button';
+import {createProfileRatingTemplate} from './components/profile-rating';
+import {render} from './utils';
 
 const FilmList = {
   COUNT: 5,
   EXTRA_COUNT: 2
-};
-
-const render = (container, template, place) => {
-  container.insertAdjacentHTML(place, template);
 };
 
 const siteHeaderElement = document.querySelector(`.header`);
