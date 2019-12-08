@@ -1,7 +1,6 @@
 import {getRandomIntegerNumber} from '../utils';
 import {getUniqueList} from '../utils';
-
-const MAX_RATING = 10;
+import {MAX_RATING} from '../const';
 
 const FILM_TITLES = [
   `Back to the Future`,
