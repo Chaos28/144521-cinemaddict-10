@@ -1,17 +1,18 @@
 import {createDescription} from '../utils';
+import {createElement} from '../utils';
 
-export const createFilmCardETemplate = (film) => {
+const getFullComment = (comment) => {
+  const commentMulti = comment > 1 ? `comments` : `comment`;
+  return `${comment} ${commentMulti}`;
+};
+
+const createFilmCardETemplate = (film) => {
 
   const {title, rating, year, duration, genres, poster, description, comments} = film;
 
-  const getFullComment = (comment) => {
-    const commentMulti = comment > 1 ? `comments` : `comment`;
-    return `${comment} ${commentMulti}`;
-  };
-
   const commentFull = getFullComment(comments);
   const fullDescription = createDescription(Array.from(description));
-  const getGenre = Array.from(genres);
+  const genreFilm = Array.from(genres);
 
   return `<article class="film-card">
             <h3 class="film-card__title">${title}</h3>
@@ -19,7 +20,7 @@ export const createFilmCardETemplate = (film) => {
             <p class="film-card__info">
               <span class="film-card__year">${year}</span>
               <span class="film-card__duration">${duration}</span>
-              <span class="film-card__genre">${getGenre[0]}</span>
+              <span class="film-card__genre">${genreFilm[0]}</span>
             </p>
             <img src="${poster}" alt="" class="film-card__poster">
             <p class="film-card__description">${fullDescription}</p>
@@ -31,3 +32,27 @@ export const createFilmCardETemplate = (film) => {
             </form>
           </article>`;
 };
+
+export default class FilmCard {
+  constructor(filmCard) {
+    this._filmCard = filmCard;
+
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createFilmCardETemplate(this._filmCard);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

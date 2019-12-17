@@ -1,5 +1,5 @@
-import {getRandomIntegerNumber} from '../utils';
-import {getUniqueList} from '../utils';
+import {getRandomIntegerNumber} from '../mock/utils';
+import {getUniqueList} from '../mock/utils';
 import {MAX_RATING} from '../const';
 
 const FILM_TITLES = [
@@ -122,13 +122,17 @@ const getRandomDuration = (minHour, maxHour, minMinute, maxMinute) => {
   return `${minHour + Math.floor(maxHour * Math.random())}h ${minMinute + Math.floor(maxMinute * Math.random())}m`;
 };
 
+const getRandomGenres = (list) => {
+  return list.slice().sort(() => Math.random() - 0.5).slice(0, 3);
+};
+
 const generateFilmCard = () => {
   return {
     title: getRandomArrayItem(FILM_TITLES),
     rating: getRandomRating(MAX_RATING),
     year: getRandomIntegerNumber(1920, 1980),
     duration: getRandomDuration(0, 3, 0, 60),
-    genres: new Set(getUniqueList(FILM_GENRES)),
+    genres: getRandomGenres(FILM_GENRES),
     poster: getRandomArrayItem(FILM_POSTERS),
     description: new Set(getUniqueList(FILM_DESCRIPTIONS)),
     comments: getRandomIntegerNumber(0, 20),
