@@ -1,13 +1,17 @@
-const render = (container, template, place = `beforeend`) => {
-  container.insertAdjacentHTML(place, template);
+const RENDER_POSITION = {
+  AFTERBEGIN: `afterbegin`,
+  BEFOREEND: `beforeend`
 };
 
-const getRandomIntegerNumber = (min, max) => {
-  return Math.floor((max - min) * Math.random() + min);
-};
-
-const getUniqueList = (list) => {
-  return list.slice().filter(() => Math.random() > 0.5).slice(0, 3);
+const render = (container, element, place = `beforeend`) => {
+  switch (place) {
+    case RENDER_POSITION.AFTERBEGIN:
+      container.prepend(element);
+      break;
+    case RENDER_POSITION.BEFOREEND:
+      container.append(element);
+      break;
+  }
 };
 
 const createDescription = (descriptions) => {
@@ -16,5 +20,11 @@ const createDescription = (descriptions) => {
   }).join(` `);
 };
 
-export {render, getRandomIntegerNumber, getUniqueList, createDescription};
+const createElement = (template) => {
+  const newElement = document.createElement(`div`);
+  newElement.innerHTML = template;
+  return newElement.firstChild;
+};
+
+export {render, createDescription, createElement, RENDER_POSITION};
 

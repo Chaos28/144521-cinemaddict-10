@@ -1,15 +1,17 @@
 // Импортирование модулей
 
-import {FilmList} from './const';
-import {createFilmListTemplate} from './components/films';
-import {createNavigationListTemplate} from './components/navigation';
-import {createSortFilmTemplate} from './components/sort.js';
-import {createFilmCardETemplate} from './components/film-card';
-import {createPopUpFilmCardTemplate} from './components/popup';
-import {createShowMoreButtonTemplate} from './components/show-more-button';
-import {createProfileRatingTemplate} from './components/profile-rating';
-import {render, getRandomIntegerNumber} from './utils';
+import {FilmListCount} from './const';
+import FilmBoardComponent from './components/films';
+import ProfileRatingComponent from './components/profile-rating';
+import NavigationComponent from './components/navigation';
+import SortComponent from './components/sort.js';
+import FilmCardComponent from './components/film-card';
+import ShowMoreButtonComponent from './components/show-more-button';
+import {render} from './utils';
+import {getRandomIntegerNumber} from './mock/utils';
 import {generateFilmCards} from './mock/film-card';
+import PopUpFilmCardComponent from './components/popup';
+import NoFilmsComponent from './components/no-films';
 
 // поиск DOM элементов для навигации и основного контента
 
@@ -18,137 +20,175 @@ const siteMainElement = document.querySelector(`.main`);
 
 // отрисовка DOM элементов
 
-render(siteMainElement, createNavigationListTemplate());
-render(siteMainElement, createSortFilmTemplate());
-render(siteMainElement, createFilmListTemplate());
+render(siteMainElement, new NavigationComponent().getElement());
+render(siteMainElement, new SortComponent().getElement());
 
 // Отрисовка ранга пользователя
 
 const filmViewedCount = getRandomIntegerNumber(0, 30);
 
 if (filmViewedCount !== 0) {
-  render(siteHeaderElement, createProfileRatingTemplate(filmViewedCount));
+  render(siteHeaderElement, new ProfileRatingComponent(filmViewedCount).getElement());
 } else {
-  render(siteHeaderElement, createProfileRatingTemplate());
+  render(siteHeaderElement, new ProfileRatingComponent(filmViewedCount).getElement());
   siteHeaderElement.querySelector(`.profile__rating`).remove();
 }
 
-// Поиск DOM элемента-контейнера для карточек фильмов
-
-const filmListElement = siteMainElement.querySelector(`.films-list`);
-const filmListContainerElement = filmListElement.querySelector(`.films-list__container`);
-
 // Генерация набора карточек фильмов
 
-const films = generateFilmCards(FilmList.ALL_COUNT);
+const filmography = generateFilmCards(FilmListCount.ALL);
 
-// Отрисовка кнопки Load More
+if (FilmListCount.ALL === 0) {
+  render(siteMainElement, new NoFilmsComponent().getElement());
+} else {
 
-render(filmListElement, createShowMoreButtonTemplate());
+  // Поиск DOM элемента-контейнера для карточек фильмов
 
-// Отрисовка карточек и реализация логики кнопки Load More
+  const filmBoardComponent = new FilmBoardComponent();
+  render(siteMainElement, filmBoardComponent.getElement());
 
-let showingFilmCardCount = FilmList.START_COUNT;
-films.slice(0, showingFilmCardCount).forEach((filmCard) => render(filmListContainerElement, createFilmCardETemplate(filmCard)));
-const loadMoreButtonElement = siteMainElement.querySelector(`.films-list__show-more`);
-loadMoreButtonElement.addEventListener(`click`, () => {
-  const previousFilmCardCount = showingFilmCardCount;
-  showingFilmCardCount += FilmList.BY_BUTTON_COUNT;
-  films.slice(previousFilmCardCount, showingFilmCardCount).forEach((filmCard) => render(filmListContainerElement, createFilmCardETemplate(filmCard)));
+  const filmListElement = filmBoardComponent.getElement().querySelector(`.films-list`);
+  const filmListContainerElement = filmListElement.querySelector(`.films-list__container`);
 
-  if (showingFilmCardCount >= films.length) {
-    loadMoreButtonElement.remove();
-  }
-});
 
-// Поиск DOM элементов для Top Rated и Most Commented карточек фильмов
+  // Отрисовка кнопки Load More
 
-const filmListTopRatedElement = siteMainElement.querySelector(`.top-rated .films-list__container`);
-const filmListMostCommentedElement = siteMainElement.querySelector(`.most-commented .films-list__container`);
+  const showMoreButtonComponent = new ShowMoreButtonComponent();
 
-// Создание функции для сортировки и отрисовки карточек в Top Rated и Most Commented
+  render(filmListElement, showMoreButtonComponent.getElement());
 
-const getExtraFilmCards = (filmList, sortingElement, count = FilmList.EXTRA_COUNT) => {
-  return filmList.slice().sort((a, b) => a[sortingElement] < b[sortingElement] ? 1 : -1).splice(0, count);
-};
+  // Функция создания компонентов карточки и попапа с их отрисовкой и созданием обработчиков
 
-// Создание функции для отрисовки случайных карточек в Top Rated и Most Commented (если комментарии/рейтинг одинаковые)
+  const renderFullFilmCards = (filmCard, position) => {
+    const popUpFilmCardComponent = new PopUpFilmCardComponent(filmCard);
+    const filmCardComponent = new FilmCardComponent(filmCard);
 
-const randomExtraFilmCards = films.slice().sort(() => {
-  return 0.5 - Math.random();
-}).splice(0, FilmList.EXTRA_COUNT);
+    render(position, filmCardComponent.getElement());
 
-// Сохранение числа комментариев и рейтинга для первых элементов списка карточек для сравнения
+    const filmCardPosterElement = filmCardComponent.getElement().querySelector(`.film-card__poster`);
+    const filmCardTitleElement = filmCardComponent.getElement().querySelector(`.film-card__title`);
+    const filmCardCommentElement = filmCardComponent.getElement().querySelector(`.film-card__comments`);
 
-const filmCommentFirst = films[0].comments;
-const filmRatingFirst = films[0].rating;
+    filmCardPosterElement.addEventListener(`click`, () => {
+      elementFilmCardClickHandler(popUpFilmCardComponent);
+      document.addEventListener(`keydown`, onEscKeyDown);
+    });
+    filmCardTitleElement.addEventListener(`click`, () => {
+      elementFilmCardClickHandler(popUpFilmCardComponent);
+      document.addEventListener(`keydown`, onEscKeyDown);
+    });
+    filmCardCommentElement.addEventListener(`click`, () => {
+      elementFilmCardClickHandler(popUpFilmCardComponent);
+      document.addEventListener(`keydown`, onEscKeyDown);
+    });
+  };
 
-// Создание функции сравнения количества комментариев и рейтинга в списке карт
+  // обработчик кнопки закрытия в попапе
 
-const filmsCompareResult = (filmsList, compareItem, firstItem) => {
-  return filmsList.slice().every((item) => {
-    return item.compareItem === firstItem;
+  const elementFilmCardClickHandler = (filmCardComp) => {
+    render(filmListContainerElement, filmCardComp.getElement());
+
+    const closePopupButtonElement = filmCardComp.getElement().querySelector(`.film-details__close-btn`);
+    closePopupButtonElement.addEventListener(`click`, () => {
+      filmCardComp.getElement().remove();
+      filmCardComp.removeElement();
+    });
+  };
+
+  const onEscKeyDown = (evt) => {
+    const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
+
+    if (isEscKey) {
+      document.querySelector(`.film-details`).remove();
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    }
+  };
+
+  // Отрисовка карточек и реализация логики кнопки Load More
+
+  let showingFilmCardCount = FilmListCount.START;
+  filmography.slice(0, showingFilmCardCount).forEach((filmCard) => renderFullFilmCards(filmCard, filmListContainerElement));
+
+  showMoreButtonComponent.getElement().addEventListener(`click`, () => {
+    const previousFilmCardCount = showingFilmCardCount;
+    showingFilmCardCount += FilmListCount.BY_BUTTON;
+    filmography.slice(previousFilmCardCount, showingFilmCardCount).forEach((filmCard) => renderFullFilmCards(filmCard, filmListContainerElement));
+
+    if (showingFilmCardCount >= filmography.length) {
+      showMoreButtonComponent.getElement().remove();
+      showMoreButtonComponent.removeElement();
+    }
   });
-};
 
-// Поиск DOM элемента для блока с Most commented
+  // Поиск DOM элементов для Top Rated и Most Commented карточек фильмов
 
-const mostCommentedElement = siteMainElement.querySelector(`.most-commented`);
+  const filmListTopRatedElement = filmBoardComponent.getElement().querySelector(`.top-rated .films-list__container`);
+  const filmListMostCommentedElement = filmBoardComponent.getElement().querySelector(`.most-commented .films-list__container`);
 
-// Проверка на отсутствие комментариев к фильмам
+  // Создание функции для сортировки и отрисовки карточек в Top Rated и Most Commented
 
-const filtredMostCommentedFilms = films.slice().filter((item) => {
-  return item.comments === 0;
-});
+  const getExtraFilmCards = (filmList, sortingElement, count = FilmListCount.EXTRA) => {
+    return filmList.slice().sort((a, b) => a[sortingElement] < b[sortingElement] ? 1 : -1).splice(0, count);
+  };
 
-// Отрисовка карточек в Most Commented при соблюдении условий: нет комментариев, одинаковое количество, отсортированные комментарии
+  // Создание функции для отрисовки случайных карточек в Top Rated и Most Commented (если комментарии/рейтинг одинаковые)
 
-if (filtredMostCommentedFilms.length === films.length) {
-  mostCommentedElement.remove();
-} else {
-  if (filmsCompareResult(films, `comments`, filmCommentFirst)) {
-    randomExtraFilmCards.forEach((filmCard) => render(filmListMostCommentedElement, createFilmCardETemplate(filmCard)));
-  } else {
-    const mostCommentedFilms = getExtraFilmCards(films, `comments`);
-    mostCommentedFilms.forEach((filmCard) => render(filmListMostCommentedElement, createFilmCardETemplate(filmCard)));
-  }
+  const getRandomExtraFilmCards = filmography.slice().sort(() => {
+    return 0.5 - Math.random();
+  }).splice(0, FilmListCount.EXTRA);
+
+  // Сохранение числа комментариев и рейтинга для первых элементов списка карточек для сравнения
+
+  const filmCommentFirst = filmography[0].comments;
+  const filmRatingFirst = filmography[0].rating;
+
+  // Создание функции сравнения количества комментариев и рейтинга в списке карт
+
+  const getFilmsCompareResult = (films, compareItem, firstItem) => {
+    return films.every((item) => {
+      return item.compareItem === firstItem;
+    });
+  };
+
+  // Поиск DOM элемента для блока с Most commented
+
+  const mostCommentedElement = filmBoardComponent.getElement().querySelector(`.most-commented`);
+
+  // Проверка на отсутствие комментариев к фильмам
+
+  const getFiltredMostCommentedFilms = filmography.slice().filter((item) => {
+    return item.comments === 0;
+  });
+
+  // Поиск DOM элемента для блока с Top Rated
+
+  const topRatedElement = filmBoardComponent.getElement().querySelector(`.top-rated`);
+
+  // Проверка на отсутствие рейтинга у фильмов
+
+  const getFiltredTopRatedFilms = filmography.filter((item) => {
+    return item.rating === 0;
+  });
+
+  // Функция Отрисовки карточек в Most Commented и Top Rated при соблюдении условий: нет комментариев/оценок, одинаковое количество, отсортированные комментарии/лценки
+
+  const renderFiltredExtraFilmCards = (fitredExtraFilms, allFilms, extraElement, filterItem, firstFilm, extraCardPosition) => {
+    if (fitredExtraFilms === allFilms.length) {
+      extraElement.remove();
+    } else {
+      if (getFilmsCompareResult(allFilms, filterItem, firstFilm)) {
+        getRandomExtraFilmCards.forEach((filmCard) => renderFullFilmCards(filmCard, extraCardPosition));
+      } else {
+        const extraFilms = getExtraFilmCards(filmography, filterItem);
+        extraFilms.forEach((filmCard) => renderFullFilmCards(filmCard, extraCardPosition));
+      }
+    }
+  };
+
+  renderFiltredExtraFilmCards(getFiltredMostCommentedFilms, filmography, mostCommentedElement, `rating`, filmRatingFirst, filmListTopRatedElement);
+  renderFiltredExtraFilmCards(getFiltredTopRatedFilms, filmography, topRatedElement, `comments`, filmCommentFirst, filmListMostCommentedElement);
 }
-
-// Поиск DOM элемента для блока с Top Rated
-
-const topRatedElement = siteMainElement.querySelector(`.top-rated`);
-
-// Проверка на отсутствие рейтинга у фильмов
-
-const filtredTopRatedFilms = films.filter((item) => {
-  return item.rating === 0;
-});
-
-// Отрисовка карточек в Top Rated при соблюдении условий: нет рейтинга, одинаковый рейтинг, отсортированные рейтинги
-
-if (filtredTopRatedFilms.length === films.length) {
-  topRatedElement.remove();
-} else {
-  if (filmsCompareResult(films, `rating`, filmRatingFirst)) {
-    randomExtraFilmCards.forEach((filmCard) => render(filmListTopRatedElement, createFilmCardETemplate(filmCard)));
-  } else {
-    const topRatedFilms = getExtraFilmCards(films, `rating`);
-    topRatedFilms.forEach((filmCard) => render(filmListTopRatedElement, createFilmCardETemplate(filmCard)));
-  }
-}
-
 // Указание общего количества фильмов в базе
 
 const footerFilmsStatisticElement = document.querySelector(`.footer__statistics > p`);
-footerFilmsStatisticElement.innerHTML = `${FilmList.ALL_COUNT} movies inside`;
-
-render(filmListElement, createPopUpFilmCardTemplate(films[0]));
-
-// Поиск и отрисовка кнопки закрытия для попапа
-
-const closePopupButtonElement = document.querySelector(`.film-details__close-btn`);
-
-closePopupButtonElement.addEventListener(`click`, () => {
-  const popupElement = document.querySelector(`.film-details`);
-  popupElement.style.display = `none`;
-});
+footerFilmsStatisticElement.innerHTML = `${filmography.length} movies inside`;

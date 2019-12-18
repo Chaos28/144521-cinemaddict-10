@@ -1,17 +1,18 @@
 import {createDescription} from '../utils';
+import {createElement} from '../utils';
 
-export const createPopUpFilmCardTemplate = (film) => {
+const createPopUpFilmCardTemplate = (film) => {
 
   const {title, rating, year, duration, genres, poster, description, comments, age, director, writers, actors, releaseDate, country} = film;
 
-  const createFullNamesList = (names) => {
+  const createFullNames = (names) => {
     return names.map((name) => {
       return `${name}`;
     }).join(`, `);
   };
 
-  const writersList = createFullNamesList(Array.from(writers));
-  const actorsList = createFullNamesList(Array.from(actors));
+  const allWriters = createFullNames(Array.from(writers));
+  const allActors = createFullNames(Array.from(actors));
   const fullDescription = createDescription(Array.from(description));
 
   const genreList = Array.from(genres);
@@ -48,11 +49,11 @@ export const createPopUpFilmCardTemplate = (film) => {
                   </tr>
                   <tr class="film-details__row">
                     <td class="film-details__term">Writers</td>
-                    <td class="film-details__cell">${writersList}</td>
+                    <td class="film-details__cell">${allWriters}</td>
                   </tr>
                   <tr class="film-details__row">
                     <td class="film-details__term">Actors</td>
-                    <td class="film-details__cell">${actorsList}</td>
+                    <td class="film-details__cell">${allActors}</td>
                   </tr>
                   <tr class="film-details__row">
                     <td class="film-details__term">Release Date</td>
@@ -185,6 +186,29 @@ export const createPopUpFilmCardTemplate = (film) => {
             </section>
           </div>
         </form>
-      </section>
-    `;
+      </section>`;
 };
+
+export default class PopUpFilmCard {
+  constructor(filmCard) {
+    this._filmCard = filmCard;
+
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createPopUpFilmCardTemplate(this._filmCard);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
