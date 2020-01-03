@@ -1,4 +1,4 @@
-import {createElement} from '../utils';
+import AbstractComponent from './abstract-component';
 
 const ProfileRatingStatuses = [
   {
@@ -28,25 +28,14 @@ const createProfileRatingTemplate = (count) => {
 };
 
 
-export default class ProfileRating {
+export default class ProfileRating extends AbstractComponent {
   constructor(filmCount) {
+    super();
+
     this._filmCount = filmCount;
-    this._element = null;
   }
 
   getTemplate() {
     return createProfileRatingTemplate(this._filmCount);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

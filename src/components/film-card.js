@@ -1,5 +1,5 @@
-import {createDescription} from '../utils';
-import {createElement} from '../utils';
+import AbstractComponent from './abstract-component';
+import {createDescription} from '../utils/utils';
 
 const getFullComment = (comment) => {
   const commentMulti = comment > 1 ? `comments` : `comment`;
@@ -33,26 +33,20 @@ const createFilmCardETemplate = (film) => {
           </article>`;
 };
 
-export default class FilmCard {
+export default class FilmCard extends AbstractComponent {
   constructor(filmCard) {
-    this._filmCard = filmCard;
+    super();
 
-    this._element = null;
+    this._filmCard = filmCard;
   }
 
   getTemplate() {
     return createFilmCardETemplate(this._filmCard);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+  setClickHandler(handler) {
+    this.getElement().querySelector(`.film-card__poster`).addEventListener(`click`, handler);
+    this.getElement().querySelector(`.film-card__title`).addEventListener(`click`, handler);
+    this.getElement().querySelector(`.film-card__comments`).addEventListener(`click`, handler);
   }
 }

@@ -1,14 +1,12 @@
-import {createDescription} from '../utils';
-import {createElement} from '../utils';
+import AbstractComponent from './abstract-component';
+import {createDescription} from '../utils/utils';
 
 const createPopUpFilmCardTemplate = (film) => {
 
   const {title, rating, year, duration, genres, poster, description, comments, age, director, writers, actors, releaseDate, country} = film;
 
   const createFullNames = (names) => {
-    return names.map((name) => {
-      return `${name}`;
-    }).join(`, `);
+    return names.join(`, `);
   };
 
   const allWriters = createFullNames(Array.from(writers));
@@ -189,26 +187,18 @@ const createPopUpFilmCardTemplate = (film) => {
       </section>`;
 };
 
-export default class PopUpFilmCard {
+export default class PopUpFilmCard extends AbstractComponent {
   constructor(filmCard) {
-    this._filmCard = filmCard;
+    super();
 
-    this._element = null;
+    this._filmCard = filmCard;
   }
 
   getTemplate() {
     return createPopUpFilmCardTemplate(this._filmCard);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+  setClosePopupButtonClickHandler(handler) {
+    this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, handler);
   }
 }

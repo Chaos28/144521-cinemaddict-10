@@ -7,4 +7,9 @@ const FilmListCount = {
 
 const MAX_RATING = 10;
 
-export {FilmListCount, MAX_RATING};
+const Key = {
+  ESCAPE: `Escape`,
+  ESC: `Esc`
+};
+
+export {FilmListCount, MAX_RATING, Key};
