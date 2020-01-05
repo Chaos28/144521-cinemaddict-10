@@ -2,11 +2,11 @@
 import PageController from './controllers/film-board';
 import FilmBoardComponent from './components/films';
 import NoFilmsComponent from './components/no-films';
-import SortComponent from './components/sort.js';
+
 import ProfileRatingComponent from './components/profile-rating';
 import NavigationComponent from './components/navigation';
 import {FilmListCount} from './const';
-import {render} from './utils/utils';
+import {render, RenderPosition} from './utils/utils';
 import {getRandomIntegerNumber} from './mock/utils';
 import {generateFilmCards} from './mock/film-card';
 
@@ -14,10 +14,6 @@ import {generateFilmCards} from './mock/film-card';
 
 const siteHeaderElement = document.querySelector(`.header`);
 const siteMainElement = document.querySelector(`.main`);
-
-// отрисовка DOM элементов
-
-render(siteMainElement, new NavigationComponent());
 
 // Отрисовка ранга пользователя
 
@@ -38,12 +34,13 @@ if (FilmListCount.ALL === 0) {
   render(siteMainElement, new NoFilmsComponent());
 } else {
   const filmBoardComponent = new FilmBoardComponent();
-  render(siteMainElement, new SortComponent());
   render(siteMainElement, filmBoardComponent);
 
   const pageController = new PageController(filmBoardComponent);
   pageController.render(filmographies);
 }
+
+render(siteMainElement, new NavigationComponent(), RenderPosition.AFTERBEGIN);
 
 // Указание общего количества фильмов в базе
 
