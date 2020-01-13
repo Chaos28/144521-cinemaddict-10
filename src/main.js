@@ -1,8 +1,7 @@
 // Импортирование модулей
-import PageController from './controllers/film-board';
+import PageController from './controllers/film-board-controller';
 import FilmBoardComponent from './components/films';
 import NoFilmsComponent from './components/no-films';
-
 import ProfileRatingComponent from './components/profile-rating';
 import NavigationComponent from './components/navigation';
 import {FilmListCount} from './const';
@@ -34,6 +33,7 @@ if (FilmListCount.ALL === 0) {
   render(siteMainElement, new NoFilmsComponent());
 } else {
   const filmBoardComponent = new FilmBoardComponent();
+
   render(siteMainElement, filmBoardComponent);
 
   const pageController = new PageController(filmBoardComponent);
