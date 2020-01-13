@@ -31,5 +31,17 @@ const createElement = (template) => {
   return newElement.firstChild;
 };
 
-export {render, remove, createDescription, createElement, RenderPosition};
+const replace = (newComponent, oldComponent) => {
+  const parentElement = oldComponent.getElement().parentElement;
+  const newElement = newComponent.getElement();
+  const oldElement = oldComponent.getElement();
+
+  const isExistElements = !!(parentElement && newElement && oldElement);
+
+  if (isExistElements && parentElement.contains(oldElement)) {
+    parentElement.replaceChild(newElement, oldElement);
+  }
+};
+
+export {render, remove, createDescription, createElement, replace, RenderPosition};
 

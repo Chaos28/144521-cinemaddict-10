@@ -141,7 +141,8 @@ const generateFilmCard = () => {
     writers: new Set(getUniqueList(WRITER_NAMES)),
     actors: new Set(getUniqueList(ACTOR_NAMES)),
     releaseDate: `${getRandomIntegerNumber(0, 31)} ${getRandomArrayItem(MONTH_NAMES)}`,
-    country: getRandomArrayItem(COUNTRIES)
+    country: getRandomArrayItem(COUNTRIES),
+    isAlreadyWatched: false
   };
 };
 

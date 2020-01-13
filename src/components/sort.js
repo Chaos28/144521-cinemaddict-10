@@ -19,6 +19,7 @@ export default class Sort extends AbstractComponent {
     super();
 
     this.currentFilmSortType = SortType.DEFAULT;
+    this._activeSortButton = this.getElement().querySelector(`.sort__button--active`);
   }
 
   getTemplate() {
@@ -39,6 +40,9 @@ export default class Sort extends AbstractComponent {
         return;
       }
 
+      this._activeSortButton.classList.remove(`sort__button--active`);
+      this._activeSortButton = evt.target;
+      this._activeSortButton.classList.add(`sort__button--active`);
       this._currentFilmSortType = filmSortType;
 
       handler(this._currentFilmSortType);
