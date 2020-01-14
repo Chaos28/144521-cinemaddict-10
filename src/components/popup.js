@@ -1,7 +1,7 @@
 import AbstractSmartComponent from './abstract-smart-component';
 import {createDescription} from '../utils/utils';
 
-const createPopUpFilmCardTemplate = (film, markFlag) => {
+const createPopupFilmCardTemplate = (film, markFlag) => {
 
   const {title, rating, year, duration, genres, poster, description, comments, age, director, writers, actors, releaseDate, country} = film;
 
@@ -267,7 +267,7 @@ export default class PoupFilmCard extends AbstractSmartComponent {
   }
 
   getTemplate() {
-    return createPopUpFilmCardTemplate(this._filmCard, this._isAlreadyWatched);
+    return createPopupFilmCardTemplate(this._filmCard, this._isAlreadyWatched);
   }
 
   setClosePopupButtonClickHandler(handler) {
