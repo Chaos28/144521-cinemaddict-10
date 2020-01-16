@@ -12,4 +12,11 @@ const Key = {
   ESC: `Esc`
 };
 
-export {FilmListCount, MAX_RATING, Key};
+const EmojiImg = {
+  'sleeping': `sleeping.png`,
+  'smile': `smile.png`,
+  'angry': `angry.png`,
+  'puke': `puke.png`
+};
+
+export {FilmListCount, MAX_RATING, Key, EmojiImg};

@@ -7,10 +7,13 @@ export default class AbstractSmartComponent extends AbstractComponent {
 
   rerender() {
     const oldElement = this.getElement();
+    const parent = oldElement.parentElement;
+
     this.removeElement();
+
     const newElement = this.getElement();
-    oldElement.querySelector(`.film-details__inner`).parentElement.replaceChild(newElement.querySelector(`.film-details__inner`), oldElement.querySelector(`.film-details__inner`));
-    this.setElement(oldElement);
+
+    parent.replaceChild(newElement, oldElement);
 
     this.recoveryListeners();
   }

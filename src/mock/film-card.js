@@ -142,7 +142,9 @@ const generateFilmCard = () => {
     actors: new Set(getUniqueList(ACTOR_NAMES)),
     releaseDate: `${getRandomIntegerNumber(0, 31)} ${getRandomArrayItem(MONTH_NAMES)}`,
     country: getRandomArrayItem(COUNTRIES),
-    isAlreadyWatched: false
+    isAlreadyWatched: false,
+    isAddedToWatchlist: false,
+    isFavorites: false
   };
 };
 

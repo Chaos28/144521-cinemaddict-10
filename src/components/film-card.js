@@ -8,7 +8,7 @@ const getFullComment = (comment) => {
 
 const createFilmCardETemplate = (film) => {
 
-  const {title, rating, year, duration, genres, poster, description, comments} = film;
+  const {title, rating, year, duration, genres, poster, description, comments, isAlreadyWatched, isAddedToWatchlist, isFavorites} = film;
 
   const commentFull = getFullComment(comments);
   const fullDescription = createDescription(Array.from(description));
@@ -26,9 +26,9 @@ const createFilmCardETemplate = (film) => {
             <p class="film-card__description">${fullDescription}</p>
             <a class="film-card__comments">${commentFull}</a>
             <form class="film-card__controls">
-              <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist">Add to watchlist</button>
-              <button class="film-card__controls-item button film-card__controls-item--mark-as-watched">Mark as watched</button>
-              <button class="film-card__controls-item button film-card__controls-item--favorite">Mark as favorite</button>
+              <button class="film-card__controls-item ${isAddedToWatchlist ? `film-card__controls-item--active` : ``} button film-card__controls-item--add-to-watchlist">Add to watchlist</button>
+              <button class="film-card__controls-item ${isAlreadyWatched ? `film-card__controls-item--active` : ``} button film-card__controls-item--mark-as-watched">Mark as watched</button>
+              <button class="film-card__controls-item ${isFavorites ? `film-card__controls-item--active` : ``} button film-card__controls-item--favorite">Mark as favorite</button>
             </form>
           </article>`;
 };
