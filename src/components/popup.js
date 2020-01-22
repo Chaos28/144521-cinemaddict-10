@@ -1,20 +1,50 @@
 import AbstractSmartComponent from './abstract-smart-component';
-import {createDescription} from '../utils/utils';
+import {createDescription, getFilmDuration} from '../utils/utils';
 import {EmojiImg} from '../const';
+import moment from 'moment';
 
-const createPopupFilmCardTemplate = (film, options, markFlag) => {
+const getFormatedDate = (date) => moment(date).format(`YYYY/MM/DD HH:MM`);
 
-  const {title, rating, year, duration, genres, poster, description, comments, age, director, writers, actors, releaseDate, country, isAlreadyWatched, isAddedToWatchlist, isFavorites} = film;
+const getGenres = (genres) => {
+  return Array.from(genres).map((item) => {
+    return `<span class="film-details__genre">${item}</span>`;
+  }).join(`\n`);
+};
+
+const renderComments = (commentsList) => {
+  return commentsList.map((item) => {
+    return `<li class="film-details__comment">
+              <span class="film-details__comment-emoji">
+                <img src="./images/emoji/${item.emoji}" width="55" height="55" alt="emoji">
+              </span>
+              <div>
+                <p class="film-details__comment-text">${item.comment}</p>
+                <p class="film-details__comment-info">
+                  <span class="film-details__comment-author">${item.userName}</span>
+                  <span class="film-details__comment-day">${getFormatedDate(item.date)}</span>
+                  <button class="film-details__comment-delete" data-id = ${item.id}>Delete</button>
+                </p>
+              </div>
+            </li>`;
+  }).join(`\n`);
+};
+
+const createPopupFilmCardTemplate = (film, options, markFlag, commentsList) => {
+
+  const {title, rating, year, duration, genres, poster, description, age, director, writers, actors, releaseDate, country, isAlreadyWatched, isAddedToWatchlist, isFavorites} = film;
   const emojiImg = options;
+
   const createFullNames = (names) => {
     return names.join(`, `);
   };
+
+  const comments = commentsList;
 
   const allWriters = createFullNames(Array.from(writers));
   const allActors = createFullNames(Array.from(actors));
   const fullDescription = createDescription(Array.from(description));
 
-  const genreList = Array.from(genres);
+  const getFullReleaseDate = () => `${moment(releaseDate).format(`DD MMMM`)} ${year}`;
 
   const getPopupFilmCardMarkTemplate = () => {
     if (markFlag) {
@@ -112,22 +142,20 @@ const createPopupFilmCardTemplate = (film, options, markFlag) => {
                   </tr>
                   <tr class="film-details__row">
                     <td class="film-details__term">Release Date</td>
-                    <td class="film-details__cell">${releaseDate} ${year}</td>
+                    <td class="film-details__cell">${getFullReleaseDate()}</td>
                   </tr>
                   <tr class="film-details__row">
                     <td class="film-details__term">Runtime</td>
-                    <td class="film-details__cell">${duration}</td>
+                    <td class="film-details__cell">${getFilmDuration(duration)}</td>
                   </tr>
                   <tr class="film-details__row">
                     <td class="film-details__term">Country</td>
                     <td class="film-details__cell">${country}</td>
                   </tr>
                   <tr class="film-details__row">
-                    <td class="film-details__term">Genres</td>
+                    <td class="film-details__term">${genres.length > 1 ? `Genres` : `Genre`}</td>
                     <td class="film-details__cell">
-                      <span class="film-details__genre">${genreList[0]}</span>
-                      <span class="film-details__genre">${genreList[1]}</span>
-                      <span class="film-details__genre">${genreList[2]}</span>
+                      ${getGenres(genres)}
                     </td>
                   </tr>
                 </table>
@@ -154,66 +182,15 @@ const createPopupFilmCardTemplate = (film, options, markFlag) => {
 
           <div class="form-details__bottom-container">
             <section class="film-details__comments-wrap">
-              <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments}</span></h3>
+              <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
 
               <ul class="film-details__comments-list">
-                <li class="film-details__comment">
-                  <span class="film-details__comment-emoji">
-                    <img src="./images/emoji/smile.png" width="55" height="55" alt="emoji">
-                  </span>
-                  <div>
-                    <p class="film-details__comment-text">Interesting setting and a good cast</p>
-                    <p class="film-details__comment-info">
-                      <span class="film-details__comment-author">Tim Macoveev</span>
-                      <span class="film-details__comment-day">2019/12/31 23:59</span>
-                      <button class="film-details__comment-delete">Delete</button>
-                    </p>
-                  </div>
-                </li>
-                <li class="film-details__comment">
-                  <span class="film-details__comment-emoji">
-                    <img src="./images/emoji/sleeping.png" width="55" height="55" alt="emoji">
-                  </span>
-                  <div>
-                    <p class="film-details__comment-text">Booooooooooring</p>
-                    <p class="film-details__comment-info">
-                      <span class="film-details__comment-author">John Doe</span>
-                      <span class="film-details__comment-day">2 days ago</span>
-                      <button class="film-details__comment-delete">Delete</button>
-                    </p>
-                  </div>
-                </li>
-                <li class="film-details__comment">
-                  <span class="film-details__comment-emoji">
-                    <img src="./images/emoji/puke.png" width="55" height="55" alt="emoji">
-                  </span>
-                  <div>
-                    <p class="film-details__comment-text">Very very old. Meh</p>
-                    <p class="film-details__comment-info">
-                      <span class="film-details__comment-author">John Doe</span>
-                      <span class="film-details__comment-day">2 days ago</span>
-                      <button class="film-details__comment-delete">Delete</button>
-                    </p>
-                  </div>
-                </li>
-                <li class="film-details__comment">
-                  <span class="film-details__comment-emoji">
-                    <img src="./images/emoji/angry.png" width="55" height="55" alt="emoji">
-                  </span>
-                  <div>
-                    <p class="film-details__comment-text">Almost two hours? Seriously?</p>
-                    <p class="film-details__comment-info">
-                      <span class="film-details__comment-author">John Doe</span>
-                      <span class="film-details__comment-day">Today</span>
-                      <button class="film-details__comment-delete">Delete</button>
-                    </p>
-                  </div>
-                </li>
+              ${renderComments(comments)}
               </ul>
 
               <div class="film-details__new-comment">
                 <div for="add-emoji" class="film-details__add-emoji-label">
-                ${emojiImg ? `<img src="./images/emoji/${emojiImg}" width="55" height="55">` : ``}
+                ${emojiImg ? `<img src="./images/emoji/${emojiImg}" width="55" height="55" class="film-details__add-emoji-img">` : ``}
                 </div>
                 <label class="film-details__comment-label">
                   <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
@@ -247,7 +224,6 @@ const createPopupFilmCardTemplate = (film, options, markFlag) => {
       </section>`;
 };
 
-
 export default class PoupFilmCard extends AbstractSmartComponent {
   constructor(filmCard) {
     super();
@@ -255,11 +231,13 @@ export default class PoupFilmCard extends AbstractSmartComponent {
     this._filmCard = filmCard;
     this._emojiImg = null;
     this._isAlreadyWatched = filmCard.isAlreadyWatched;
+    this._comments = Array.from(this._filmCard.comments);
 
     this._closeButtonHandler = null;
     this._alreadyWatchedButtonHandler = null;
     this._addToWatchlistButtonHandler = null;
     this._addToFavoritesButtonHandler = null;
+    this._deleteClickHandler = null;
     this._subscribeOnEmojiImgEvents();
   }
 
@@ -267,8 +245,16 @@ export default class PoupFilmCard extends AbstractSmartComponent {
     return this._isAlreadyWatched;
   }
 
+  addComment(comment) {
+    this._comments.push(comment);
+  }
+
+  getComments() {
+    return this._comments;
+  }
+
   getTemplate() {
-    return createPopupFilmCardTemplate(this._filmCard, this._emojiImg, this._isAlreadyWatched);
+    return createPopupFilmCardTemplate(this._filmCard, this._emojiImg, this._isAlreadyWatched, this._comments);
   }
 
   setClosePopupButtonClickHandler(handler) {
@@ -291,11 +277,17 @@ export default class PoupFilmCard extends AbstractSmartComponent {
     this._recoveryAddToFavoritesHandler();
   }
 
+  setDeleteButtonClickHandler(handler) {
+    this._deleteClickHandler = handler;
+    this._recoveryDeleteButtonHandler();
+  }
+
   recoveryListeners() {
     this._recoveryClosePopupHandler();
     this._recoveryAlreadyWatchedHandler();
     this._recoveryAddToWatchlistHandler();
     this._recoveryAddToFavoritesHandler();
+    this._recoveryDeleteButtonHandler();
     this._subscribeOnEmojiImgEvents();
   }
 
@@ -313,6 +305,11 @@ export default class PoupFilmCard extends AbstractSmartComponent {
 
   _recoveryAddToFavoritesHandler() {
     this.getElement().querySelector(`.film-details__control-label--favorite`).addEventListener(`click`, this._addToFavoritesButtonHandler);
+  }
+
+  _recoveryDeleteButtonHandler() {
+    const deleteButtons = this.getElement().querySelectorAll(`.film-details__comment-delete`);
+    deleteButtons.forEach((el) => el.addEventListener(`click`, this._deleteClickHandler));
   }
 
   _subscribeOnEmojiImgEvents() {

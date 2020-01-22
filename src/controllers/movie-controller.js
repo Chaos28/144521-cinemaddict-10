@@ -1,6 +1,8 @@
+import he from 'he';
 import FilmCardComponent from '../components/film-card';
 import PopupFilmCardComponent from '../components/popup';
 import {render, remove, replace} from '../utils/utils';
+import {getRandomArrayItem, usersNames} from '../mock/utils';
 
 const FilmCardMode = {
   DEFAULT: `default`,
@@ -24,6 +26,8 @@ export default class MovieController {
     this._addToWatchlistHandler = this._addToWatchlistHandler.bind(this);
     this._addToWatchedHandler = this._addToWatchedHandler.bind(this);
     this._addToFavoritesHandler = this._addToFavoritesHandler.bind(this);
+    this._commentAddingPressHandler = this._commentAddingPressHandler.bind(this);
+    this._deleteClickHandler = this._deleteClickHandler.bind(this);
   }
 
   setDefaultView() {
@@ -31,6 +35,10 @@ export default class MovieController {
       remove(this._popupFilmCardComponent);
       this._filmCardMode = FilmCardMode.DEFAULT;
     }
+  }
+
+  getFilmsData() {
+    return this._filmCard;
   }
 
   render(filmCard) {
@@ -47,6 +55,7 @@ export default class MovieController {
     } else {
       render(this._container, this._filmCardComponent);
     }
+
   }
 
   _createFilmCardComponent(filmCard) {
@@ -64,11 +73,13 @@ export default class MovieController {
     const popupComponent = new PopupFilmCardComponent(filmCard);
     popupComponent.setClosePopupButtonClickHandler(() => {
       remove(this._popupFilmCardComponent);
+      document.removeEventListener(`keydown`, this._commentAddingPressHandler);
     });
 
     popupComponent.setAlreadyWatchedButtonClickHandler(this._addToWatchedHandler);
     popupComponent.setAddToWatchlistButtonClickHandler(this._addToWatchlistHandler);
     popupComponent.setAddToFavoritesButtonClickHandler(this._addToFavoritesHandler);
+    popupComponent.setDeleteButtonClickHandler(this._deleteClickHandler);
 
     return popupComponent;
   }
@@ -79,6 +90,29 @@ export default class MovieController {
     render(this._container, this._popupFilmCardComponent);
     document.addEventListener(`keydown`, this._setEscButtonKeydownHandler);
     this._popupFilmCardComponent.recoveryListeners();
+    document.addEventListener(`keydown`, this._commentAddingPressHandler);
+  }
+
+  _commentAddingPressHandler(evt) {
+    const key = evt.key;
+
+    if ((evt.ctrlKey || evt.metaKey) && key === `Enter`) {
+      const input = this._popupFilmCardComponent.getElement().querySelector(`.film-details__comment-input`).value;
+      const encodedInput = he.encode(input);
+      const imageAddress = this._popupFilmCardComponent.getElement().querySelector(`.film-details__add-emoji-img`).src.split(`/`);
+      const image = imageAddress[imageAddress.length - 1];
+      if (encodedInput.trim() !== ``) {
+        const commentObj = {
+          userName: getRandomArrayItem(usersNames),
+          comment: encodedInput,
+          date: new Date(),
+          emoji: image
+        };
+        this._popupFilmCardComponent.addComment(commentObj);
+        this._onDataChange(this, this._filmCard, Object.assign({}, this._filmCard, {comments: this._popupFilmCardComponent.getComments()}));
+        this._popupFilmCardComponent.rerender();
+      }
+    }
   }
 
   _setEscButtonKeydownHandler(evt) {
@@ -87,6 +121,7 @@ export default class MovieController {
     if (isEscKey) {
       remove(this._popupFilmCardComponent);
       document.removeEventListener(`keydown`, this._setEscButtonKeydownHandler);
+      document.removeEventListener(`keydown`, this._commentAddingPressHandler);
     }
   }
 
@@ -111,4 +146,10 @@ export default class MovieController {
         Object.assign({}, this._filmCard, {isFavorites: !this._filmCard.isFavorites}));
   }
 
+  _deleteClickHandler(evt) {
+    evt.preventDefault();
+    this._onDataChange(this, evt.target.dataset.id, null);
+    this._popupFilmCardComponent._comments = this._filmCard.comments;
+    this._popupFilmCardComponent.rerender();
+  }
 }

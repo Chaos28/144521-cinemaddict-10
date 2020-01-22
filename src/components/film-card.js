@@ -1,17 +1,17 @@
 import AbstractComponent from './abstract-component';
-import {createDescription} from '../utils/utils';
+import {createDescription, getFilmDuration} from '../utils/utils';
 
 const getFullComment = (comment) => {
-  const commentMulti = comment > 1 ? `comments` : `comment`;
-  return `${comment} ${commentMulti}`;
+  const commentMulti = comment.length > 1 ? `comments` : `comment`;
+  return `${comment.length} ${commentMulti}`;
 };
 
 const createFilmCardETemplate = (film) => {
 
   const {title, rating, year, duration, genres, poster, description, comments, isAlreadyWatched, isAddedToWatchlist, isFavorites} = film;
-
   const commentFull = getFullComment(comments);
   const fullDescription = createDescription(Array.from(description));
+  const getShortDescription = () => fullDescription.length > 140 ? `${fullDescription.slice(0, 140)} ...` : fullDescription;
   const genreFilm = Array.from(genres);
 
   return `<article class="film-card">
@@ -19,11 +19,11 @@ const createFilmCardETemplate = (film) => {
             <p class="film-card__rating">${rating}</p>
             <p class="film-card__info">
               <span class="film-card__year">${year}</span>
-              <span class="film-card__duration">${duration}</span>
+              <span class="film-card__duration">${getFilmDuration(duration)}</span>
               <span class="film-card__genre">${genreFilm[0]}</span>
             </p>
             <img src="${poster}" alt="" class="film-card__poster">
-            <p class="film-card__description">${fullDescription}</p>
+            <p class="film-card__description">${getShortDescription()}</p>
             <a class="film-card__comments">${commentFull}</a>
             <form class="film-card__controls">
               <button class="film-card__controls-item ${isAddedToWatchlist ? `film-card__controls-item--active` : ``} button film-card__controls-item--add-to-watchlist">Add to watchlist</button>
@@ -51,14 +51,23 @@ export default class FilmCard extends AbstractComponent {
   }
 
   setAddToWatchlistButtonClickHandler(handler) {
-    this.getElement().querySelector(`.film-card__controls-item--add-to-watchlist`).addEventListener(`click`, handler);
+    this.getElement().querySelector(`.film-card__controls-item--add-to-watchlist`).addEventListener(`click`, (evt) => {
+      evt.preventDefault();
+      handler();
+    });
   }
 
   setAlreadyWatchedButtonClickHandler(handler) {
-    this.getElement().querySelector(`.film-card__controls-item--mark-as-watched`).addEventListener(`click`, handler);
+    this.getElement().querySelector(`.film-card__controls-item--mark-as-watched`).addEventListener(`click`, (evt) => {
+      evt.preventDefault();
+      handler();
+    });
   }
 
   setAddToFavoritesButtonClickHandler(handler) {
-    this.getElement().querySelector(`.film-card__controls-item--favorite`).addEventListener(`click`, handler);
+    this.getElement().querySelector(`.film-card__controls-item--favorite`).addEventListener(`click`, (evt) => {
+      evt.preventDefault();
+      handler();
+    });
   }
 }

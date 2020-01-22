@@ -1,6 +1,15 @@
+import moment from 'moment';
+
 const RenderPosition = {
   AFTERBEGIN: `afterbegin`,
   BEFOREEND: `beforeend`
+};
+
+const FilterType = {
+  ALL: `all`,
+  WATCHLIST: `watchlist`,
+  HISTORY: `history`,
+  FAVORITES: `favorites`
 };
 
 const render = (container, component, place = RenderPosition.BEFOREEND) => {
@@ -43,5 +52,10 @@ const replace = (newComponent, oldComponent) => {
   }
 };
 
-export {render, remove, createDescription, createElement, replace, RenderPosition};
+const getFilmDuration = (duration) => {
+  const momentFilmDuration = moment.duration(duration);
+  return `${momentFilmDuration.hours()}h ${momentFilmDuration.minutes()}m`;
+};
+
+export {render, remove, createDescription, createElement, replace, RenderPosition, getFilmDuration, FilterType};
 

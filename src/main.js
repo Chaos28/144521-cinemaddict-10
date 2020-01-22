@@ -1,13 +1,14 @@
 // Импортирование модулей
 import PageController from './controllers/film-board-controller';
+// import NavigationController from './controllers/navigation-controller';
 import FilmBoardComponent from './components/films';
 import NoFilmsComponent from './components/no-films';
 import ProfileRatingComponent from './components/profile-rating';
-import NavigationComponent from './components/navigation';
 import {FilmListCount} from './const';
-import {render, RenderPosition} from './utils/utils';
+import {render} from './utils/utils';
 import {getRandomIntegerNumber} from './mock/utils';
 import {generateFilmCards} from './mock/film-card';
+import Films from './models/movies';
 
 // поиск DOM элементов для навигации и основного контента
 
@@ -28,6 +29,8 @@ if (filmViewedCount !== 0) {
 // Генерация набора карточек фильмов
 
 const filmographies = generateFilmCards(FilmListCount.ALL);
+const films = new Films();
+films.setFilms(filmographies);
 
 if (FilmListCount.ALL === 0) {
   render(siteMainElement, new NoFilmsComponent());
@@ -36,11 +39,9 @@ if (FilmListCount.ALL === 0) {
 
   render(siteMainElement, filmBoardComponent);
 
-  const pageController = new PageController(filmBoardComponent);
-  pageController.render(filmographies);
+  const pageController = new PageController(filmBoardComponent, films);
+  pageController.render();
 }
-
-render(siteMainElement, new NavigationComponent(), RenderPosition.AFTERBEGIN);
 
 // Указание общего количества фильмов в базе
 

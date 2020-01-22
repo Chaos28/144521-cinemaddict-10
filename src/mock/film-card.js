@@ -1,5 +1,4 @@
-import {getRandomIntegerNumber} from '../mock/utils';
-import {getUniqueList} from '../mock/utils';
+import {getRandomIntegerNumber, getRandomArrayItem, getUniqueList, getComments} from '../mock/utils';
 import {MAX_RATING} from '../const';
 
 const FILM_TITLES = [
@@ -108,48 +107,48 @@ const ACTOR_NAMES = [
   `James McAvoy`
 ];
 
-const getRandomArrayItem = (array) => {
-  const randomIndex = getRandomIntegerNumber(0, array.length);
-
-  return array[randomIndex];
-};
-
 const getRandomRating = (max) => {
   return +(max * Math.random()).toFixed(1);
 };
 
-const getRandomDuration = (minHour, maxHour, minMinute, maxMinute) => {
-  return `${minHour + Math.floor(maxHour * Math.random())}h ${minMinute + Math.floor(maxMinute * Math.random())}m`;
+const getMillisecondsFromMinutes = (minutes) => {
+  return minutes * 60 * 1000;
 };
+
+const duration = getRandomIntegerNumber(getMillisecondsFromMinutes(60), getMillisecondsFromMinutes(120));
+
 
 const getRandomGenres = (list) => {
   return list.slice().sort(() => Math.random() - 0.5).slice(0, 3);
 };
+
 
 const generateFilmCard = () => {
   return {
     title: getRandomArrayItem(FILM_TITLES),
     rating: getRandomRating(MAX_RATING),
     year: getRandomIntegerNumber(1920, 1980),
-    duration: getRandomDuration(0, 3, 0, 60),
+    duration,
     genres: getRandomGenres(FILM_GENRES),
     poster: getRandomArrayItem(FILM_POSTERS),
     description: new Set(getUniqueList(FILM_DESCRIPTIONS)),
-    comments: getRandomIntegerNumber(0, 20),
+    comments: getComments(getRandomIntegerNumber(0, 30)),
     age: `${getRandomIntegerNumber(10, 19)} +`,
     director: getRandomArrayItem(DIRECTOR_NAMES),
     writers: new Set(getUniqueList(WRITER_NAMES)),
     actors: new Set(getUniqueList(ACTOR_NAMES)),
-    releaseDate: `${getRandomIntegerNumber(0, 31)} ${getRandomArrayItem(MONTH_NAMES)}`,
+    releaseDate: `${getRandomIntegerNumber(1, 31)} ${getRandomArrayItem(MONTH_NAMES)}`,
     country: getRandomArrayItem(COUNTRIES),
-    isAlreadyWatched: false,
-    isAddedToWatchlist: false,
-    isFavorites: false
+    isAddedToWatchlist: Math.random() > 0.5,
+    isAlreadyWatched: Math.random() > 0.5,
+    isFavorites: Math.random() > 0.5
   };
 };
 
 const generateFilmCards = (count) => {
-  return new Array(count).fill(``).map(generateFilmCard);
+  return new Array(count).fill(``).map((item, index) => {
+    return Object.assign({}, generateFilmCard(), {id: index});
+  });
 };
 
 export {generateFilmCard, generateFilmCards};
