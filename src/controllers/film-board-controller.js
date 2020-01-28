@@ -19,11 +19,13 @@ const renderFilmCards = (filmListElement, films, onDataChange, onViewChange) => 
 };
 
 export default class PageController {
-  constructor(container, films) {
+  constructor(container, films, stat) {
+    this._cont = container;
     this._container = container.getElement();
     this._filmsContainer = this._container.querySelector(`.films-list__container`);
     this._filmModel = films;
     this._films = null;
+    this._stat = stat;
     this._showMoreButtonComponent = new ShowMoreButtonComponent();
     this._sortComponent = new SortComponent();
 
@@ -43,7 +45,7 @@ export default class PageController {
 
   render() {
     render(siteMainElement, this._sortComponent, RenderPosition.AFTERBEGIN);
-    this._navigationController = new NavigationController(siteMainElement, this._filmModel);
+    this._navigationController = new NavigationController(siteMainElement, this._filmModel, this, this._stat);
     this._navigationController.render();
 
     this._sortComponent.setSortTypeChangeHandler((filmSortType) => {
@@ -51,7 +53,7 @@ export default class PageController {
 
       switch (filmSortType) {
         case SortType.YEAR_UP:
-          sortedFilms = this._films.slice().sort((a, b) => b.year - a.year);
+          sortedFilms = this._films.slice().sort((a, b) => b.releaseDate.getFullYear() - a.releaseDate.getFullYear());
           break;
         case SortType.RATING_UP:
           sortedFilms = this._films.slice().sort((a, b) => b.rating - a.rating);
@@ -181,5 +183,15 @@ export default class PageController {
 
   _onFilterChange() {
     this.renderFilms(this._filmModel.getFilms());
+  }
+
+  hide() {
+    this._cont.hide();
+    this._sortComponent.hide();
+  }
+
+  show() {
+    this._cont.show();
+    this._sortComponent.show();
   }
 }

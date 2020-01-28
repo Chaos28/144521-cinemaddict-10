@@ -31,7 +31,7 @@ const renderComments = (commentsList) => {
 
 const createPopupFilmCardTemplate = (film, options, markFlag, commentsList) => {
 
-  const {title, rating, year, duration, genres, poster, description, age, director, writers, actors, releaseDate, country, isAlreadyWatched, isAddedToWatchlist, isFavorites} = film;
+  const {title, rating, releaseDate, duration, genres, poster, description, age, director, writers, actors, country, isAlreadyWatched, isAddedToWatchlist, isFavorites} = film;
   const emojiImg = options;
 
   const createFullNames = (names) => {
@@ -44,7 +44,7 @@ const createPopupFilmCardTemplate = (film, options, markFlag, commentsList) => {
   const allActors = createFullNames(Array.from(actors));
   const fullDescription = createDescription(Array.from(description));
 
-  const getFullReleaseDate = () => `${moment(releaseDate).format(`DD MMMM`)} ${year}`;
+  const getFullReleaseDate = () => moment(releaseDate).format(`DD MMMM YYYY`);
 
   const getPopupFilmCardMarkTemplate = () => {
     if (markFlag) {
@@ -89,7 +89,7 @@ const createPopupFilmCardTemplate = (film, options, markFlag, commentsList) => {
                       <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="8" id="rating-8">
                       <label class="film-details__user-rating-label" for="rating-8">8</label>
 
-                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9" checked>
+                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9">
                       <label class="film-details__user-rating-label" for="rating-9">9</label>
 
                     </div>
@@ -153,7 +153,7 @@ const createPopupFilmCardTemplate = (film, options, markFlag, commentsList) => {
                     <td class="film-details__cell">${country}</td>
                   </tr>
                   <tr class="film-details__row">
-                    <td class="film-details__term">${genres.length > 1 ? `Genres` : `Genre`}</td>
+                    <td class="film-details__term">${genres.size > 1 ? `Genres` : `Genre`}</td>
                     <td class="film-details__cell">
                       ${getGenres(genres)}
                     </td>
@@ -282,6 +282,21 @@ export default class PoupFilmCard extends AbstractSmartComponent {
     this._recoveryDeleteButtonHandler();
   }
 
+  setScoreButtonClickHandler() {
+    if (this._isAlreadyWatched) {
+      const undoButton = this.getElement().querySelector(`.film-details__watched-reset`);
+      undoButton.addEventListener(`click`, (evt) => {
+        // debugger;
+        evt.preventDefault();
+        const activeScore = this.getElement().querySelector(`.film-details__user-rating-input:checked`);
+        if (!activeScore) {
+          return;
+        }
+        activeScore.checked = false;
+      });
+    }
+  }
+
   recoveryListeners() {
     this._recoveryClosePopupHandler();
     this._recoveryAlreadyWatchedHandler();
@@ -289,6 +304,7 @@ export default class PoupFilmCard extends AbstractSmartComponent {
     this._recoveryAddToFavoritesHandler();
     this._recoveryDeleteButtonHandler();
     this._subscribeOnEmojiImgEvents();
+    this.setScoreButtonClickHandler();
   }
 
   _recoveryClosePopupHandler() {

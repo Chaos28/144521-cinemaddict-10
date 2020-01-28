@@ -1,11 +1,14 @@
 import NavigationComponent from '../components/navigation';
-import {render, replace, RenderPosition} from '../utils/utils';
+import {render, replace, RenderPosition, FilterType} from '../utils/utils';
 
 export default class NavigationController {
-  constructor(container, model) {
+  constructor(container, model, pageController, stat) {
     this._container = container;
     this._model = model;
     this._navigation = null;
+    this._pageController = pageController;
+    this._stat = stat;
+    this._activeFilter = FilterType.ALL;
     this._onFilterChange = this._onFilterChange.bind(this);
     this._onDataChange = this._onDataChange.bind(this);
   }
@@ -25,7 +28,22 @@ export default class NavigationController {
   }
 
   _onFilterChange(filterType) {
-    this._model.setFilter(filterType);
+    // this._model.setFilter(filterType);
+
+    if (filterType === `stats`) {
+      this._pageController.hide();
+      this._stat.show();
+      this._stat.renderChart();
+      this._activeFilter = filterType;
+    } else if (this._activeFilter === `stats`) {
+      this._stat.hide();
+      this._pageController.show();
+      this._activeFilter = filterType;
+      this._model.setFilter(filterType);
+    } else {
+      this._activeFilter = filterType;
+      this._model.setFilter(filterType);
+    }
   }
 
   _onDataChange() {

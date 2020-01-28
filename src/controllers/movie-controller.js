@@ -80,6 +80,7 @@ export default class MovieController {
     popupComponent.setAddToWatchlistButtonClickHandler(this._addToWatchlistHandler);
     popupComponent.setAddToFavoritesButtonClickHandler(this._addToFavoritesHandler);
     popupComponent.setDeleteButtonClickHandler(this._deleteClickHandler);
+    popupComponent.setScoreButtonClickHandler();
 
     return popupComponent;
   }
@@ -133,10 +134,11 @@ export default class MovieController {
   }
 
   _addToWatchedHandler() {
+    const watchedDate = this._popupFilmCardComponent.getIsAlreadyWatched() ? new Date() : null;
     this._onDataChange(
         this,
         this._filmCard,
-        Object.assign({}, this._filmCard, {isAlreadyWatched: !this._popupFilmCardComponent.getIsAlreadyWatched()}));
+        Object.assign({}, this._filmCard, {isAlreadyWatched: !this._popupFilmCardComponent.getIsAlreadyWatched(), whatchedDate: watchedDate}));
   }
 
   _addToFavoritesHandler() {

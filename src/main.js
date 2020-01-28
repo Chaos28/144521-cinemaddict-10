@@ -4,6 +4,7 @@ import PageController from './controllers/film-board-controller';
 import FilmBoardComponent from './components/films';
 import NoFilmsComponent from './components/no-films';
 import ProfileRatingComponent from './components/profile-rating';
+import StatComponent from './components/stat';
 import {FilmListCount} from './const';
 import {render} from './utils/utils';
 import {getRandomIntegerNumber} from './mock/utils';
@@ -32,6 +33,8 @@ const filmographies = generateFilmCards(FilmListCount.ALL);
 const films = new Films();
 films.setFilms(filmographies);
 
+const statComponent = new StatComponent(films);
+
 if (FilmListCount.ALL === 0) {
   render(siteMainElement, new NoFilmsComponent());
 } else {
@@ -39,8 +42,9 @@ if (FilmListCount.ALL === 0) {
 
   render(siteMainElement, filmBoardComponent);
 
-  const pageController = new PageController(filmBoardComponent, films);
+  const pageController = new PageController(filmBoardComponent, films, statComponent);
   pageController.render();
+  render(siteMainElement, statComponent);
 }
 
 // Указание общего количества фильмов в базе

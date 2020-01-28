@@ -63,21 +63,6 @@ const COUNTRIES = [
   `Canada`
 ];
 
-const MONTH_NAMES = [
-  `January`,
-  `February`,
-  `March`,
-  `April`,
-  `May`,
-  `June`,
-  `July`,
-  `August`,
-  `September`,
-  `October`,
-  `November`,
-  `December`,
-];
-
 const DIRECTOR_NAMES = [
   `Robert Zemeckis`,
   `Alfred Hitchcock`,
@@ -115,21 +100,21 @@ const getMillisecondsFromMinutes = (minutes) => {
   return minutes * 60 * 1000;
 };
 
-const duration = getRandomIntegerNumber(getMillisecondsFromMinutes(60), getMillisecondsFromMinutes(120));
-
-
-const getRandomGenres = (list) => {
-  return list.slice().sort(() => Math.random() - 0.5).slice(0, 3);
-};
-
-
 const generateFilmCard = () => {
+
+  const duration = getRandomIntegerNumber(getMillisecondsFromMinutes(60), getMillisecondsFromMinutes(120));
+
+  const releaseDate = new Date(new Date().setDate(new Date().getDate() - Math.floor(Math.random() * 10000)));
+
+  const whatchedDate = new Date(new Date().setDate(new Date().getDate() - (Math.random() * Math.round((new Date() - releaseDate) / (1000 * 60 * 60 * 24)))));
+
+  const isAlreadyWatched = Math.random() > 0.5;
+
   return {
     title: getRandomArrayItem(FILM_TITLES),
     rating: getRandomRating(MAX_RATING),
-    year: getRandomIntegerNumber(1920, 1980),
     duration,
-    genres: getRandomGenres(FILM_GENRES),
+    genres: new Set(getUniqueList(FILM_GENRES)),
     poster: getRandomArrayItem(FILM_POSTERS),
     description: new Set(getUniqueList(FILM_DESCRIPTIONS)),
     comments: getComments(getRandomIntegerNumber(0, 30)),
@@ -137,11 +122,12 @@ const generateFilmCard = () => {
     director: getRandomArrayItem(DIRECTOR_NAMES),
     writers: new Set(getUniqueList(WRITER_NAMES)),
     actors: new Set(getUniqueList(ACTOR_NAMES)),
-    releaseDate: `${getRandomIntegerNumber(1, 31)} ${getRandomArrayItem(MONTH_NAMES)}`,
+    releaseDate,
     country: getRandomArrayItem(COUNTRIES),
     isAddedToWatchlist: Math.random() > 0.5,
-    isAlreadyWatched: Math.random() > 0.5,
-    isFavorites: Math.random() > 0.5
+    isFavorites: Math.random() > 0.5,
+    isAlreadyWatched,
+    whatchedDate: isAlreadyWatched ? whatchedDate : null,
   };
 };
 

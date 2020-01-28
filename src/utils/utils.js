@@ -9,7 +9,8 @@ const FilterType = {
   ALL: `all`,
   WATCHLIST: `watchlist`,
   HISTORY: `history`,
-  FAVORITES: `favorites`
+  FAVORITES: `favorites`,
+  STATS: `stats`
 };
 
 const render = (container, component, place = RenderPosition.BEFOREEND) => {

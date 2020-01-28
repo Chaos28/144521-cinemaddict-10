@@ -8,7 +8,7 @@ const getFullComment = (comment) => {
 
 const createFilmCardETemplate = (film) => {
 
-  const {title, rating, year, duration, genres, poster, description, comments, isAlreadyWatched, isAddedToWatchlist, isFavorites} = film;
+  const {title, rating, duration, releaseDate, genres, poster, description, comments, isAlreadyWatched, isAddedToWatchlist, isFavorites} = film;
   const commentFull = getFullComment(comments);
   const fullDescription = createDescription(Array.from(description));
   const getShortDescription = () => fullDescription.length > 140 ? `${fullDescription.slice(0, 140)} ...` : fullDescription;
@@ -18,7 +18,7 @@ const createFilmCardETemplate = (film) => {
             <h3 class="film-card__title">${title}</h3>
             <p class="film-card__rating">${rating}</p>
             <p class="film-card__info">
-              <span class="film-card__year">${year}</span>
+              <span class="film-card__year">${releaseDate.getFullYear()}</span>
               <span class="film-card__duration">${getFilmDuration(duration)}</span>
               <span class="film-card__genre">${genreFilm[0]}</span>
             </p>
