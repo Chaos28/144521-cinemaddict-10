@@ -1,5 +1,5 @@
 import AbstractSmartComponent from './abstract-smart-component';
-import {createDescription, getFilmDuration} from '../utils/utils';
+import {getFilmDuration} from '../utils/utils';
 import {EmojiImg} from '../const';
 import moment from 'moment';
 
@@ -20,7 +20,7 @@ const renderComments = (commentsList) => {
               <div>
                 <p class="film-details__comment-text">${item.comment}</p>
                 <p class="film-details__comment-info">
-                  <span class="film-details__comment-author">${item.userName}</span>
+                  <span class="film-details__comment-author">${item.user}</span>
                   <span class="film-details__comment-day">${getFormatedDate(item.date)}</span>
                   <button class="film-details__comment-delete" data-id = ${item.id}>Delete</button>
                 </p>
@@ -29,25 +29,16 @@ const renderComments = (commentsList) => {
   }).join(`\n`);
 };
 
-const createPopupFilmCardTemplate = (film, options, markFlag, commentsList) => {
+const createPopupFilmCardTemplate = (film, emojiImg, commentsList, isAlreadyWatched, isAddedToWatchlist, isFavorites, personalRating) => {
 
-  const {title, rating, releaseDate, duration, genres, poster, description, age, director, writers, actors, country, isAlreadyWatched, isAddedToWatchlist, isFavorites} = film;
-  const emojiImg = options;
-
-  const createFullNames = (names) => {
-    return names.join(`, `);
-  };
+  const {title, rating, releaseDate, duration, genres, poster, description, age, director, writers, actors, country} = film;
 
   const comments = commentsList;
-
-  const allWriters = createFullNames(Array.from(writers));
-  const allActors = createFullNames(Array.from(actors));
-  const fullDescription = createDescription(Array.from(description));
 
   const getFullReleaseDate = () => moment(releaseDate).format(`DD MMMM YYYY`);
 
   const getPopupFilmCardMarkTemplate = () => {
-    if (markFlag) {
+    if (isAlreadyWatched) {
       return `<div class="form-details__middle-container">
               <section class="film-details__user-rating-wrap">
                 <div class="film-details__user-rating-controls">
@@ -65,31 +56,31 @@ const createPopupFilmCardTemplate = (film, options, markFlag, commentsList) => {
                     <p class="film-details__user-rating-feelings">How you feel it?</p>
 
                     <div class="film-details__user-rating-score">
-                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="1" id="rating-1">
+                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" ${personalRating === 1 ? `checked` : ``} value="1" id="rating-1">
                       <label class="film-details__user-rating-label" for="rating-1">1</label>
 
-                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="2" id="rating-2">
+                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" ${personalRating === 2 ? `checked` : ``} value="2" id="rating-2">
                       <label class="film-details__user-rating-label" for="rating-2">2</label>
 
-                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="3" id="rating-3">
+                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" ${personalRating === 3 ? `checked` : ``} value="3" id="rating-3">
                       <label class="film-details__user-rating-label" for="rating-3">3</label>
 
-                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="4" id="rating-4">
+                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" ${personalRating === 4 ? `checked` : ``} value="4" id="rating-4">
                       <label class="film-details__user-rating-label" for="rating-4">4</label>
 
-                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="5" id="rating-5">
+                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" ${personalRating === 5 ? `checked` : ``} value="5" id="rating-5">
                       <label class="film-details__user-rating-label" for="rating-5">5</label>
 
-                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="6" id="rating-6">
+                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" ${personalRating === 6 ? `checked` : ``} value="6" id="rating-6">
                       <label class="film-details__user-rating-label" for="rating-6">6</label>
 
-                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="7" id="rating-7">
+                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" ${personalRating === 7 ? `checked` : ``} value="7" id="rating-7">
                       <label class="film-details__user-rating-label" for="rating-7">7</label>
 
-                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="8" id="rating-8">
+                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" ${personalRating === 8 ? `checked` : ``} value="8" id="rating-8">
                       <label class="film-details__user-rating-label" for="rating-8">8</label>
 
-                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9">
+                      <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" ${personalRating === 9 ? `checked` : ``} value="9" id="rating-9">
                       <label class="film-details__user-rating-label" for="rating-9">9</label>
 
                     </div>
@@ -134,11 +125,11 @@ const createPopupFilmCardTemplate = (film, options, markFlag, commentsList) => {
                   </tr>
                   <tr class="film-details__row">
                     <td class="film-details__term">Writers</td>
-                    <td class="film-details__cell">${allWriters}</td>
+                    <td class="film-details__cell">${Array.from(writers)}</td>
                   </tr>
                   <tr class="film-details__row">
                     <td class="film-details__term">Actors</td>
-                    <td class="film-details__cell">${allActors}</td>
+                    <td class="film-details__cell">${Array.from(actors)}</td>
                   </tr>
                   <tr class="film-details__row">
                     <td class="film-details__term">Release Date</td>
@@ -161,7 +152,7 @@ const createPopupFilmCardTemplate = (film, options, markFlag, commentsList) => {
                 </table>
 
                 <p class="film-details__film-description">
-                  ${fullDescription}
+                  ${description}
                 </p>
               </div>
             </div>
@@ -231,14 +222,18 @@ export default class PoupFilmCard extends AbstractSmartComponent {
     this._filmCard = filmCard;
     this._emojiImg = null;
     this._isAlreadyWatched = filmCard.isAlreadyWatched;
-    this._comments = Array.from(this._filmCard.comments);
-
+    this._isAddedToWatchlist = filmCard.isAddedToWatchlist;
+    this._isFavorites = filmCard.isFavorites;
+    this._personalRating = filmCard.personalRating;
+    this._comments = [];
+    this._personalRatingHandler = null;
     this._closeButtonHandler = null;
     this._alreadyWatchedButtonHandler = null;
     this._addToWatchlistButtonHandler = null;
     this._addToFavoritesButtonHandler = null;
+    this._undoPersonalRatingHandler = null;
     this._deleteClickHandler = null;
-    this._subscribeOnEmojiImgEvents();
+
   }
 
   getIsAlreadyWatched() {
@@ -254,7 +249,7 @@ export default class PoupFilmCard extends AbstractSmartComponent {
   }
 
   getTemplate() {
-    return createPopupFilmCardTemplate(this._filmCard, this._emojiImg, this._isAlreadyWatched, this._comments);
+    return createPopupFilmCardTemplate(this._filmCard, this._emojiImg, this._comments, this._isAlreadyWatched, this._isAddedToWatchlist, this._isFavorites, this._personalRating);
   }
 
   setClosePopupButtonClickHandler(handler) {
@@ -282,18 +277,17 @@ export default class PoupFilmCard extends AbstractSmartComponent {
     this._recoveryDeleteButtonHandler();
   }
 
-  setScoreButtonClickHandler() {
+  setUndoPersonalRatingHandler(handler) {
+    this._undoPersonalRatingHandler = handler;
+    if (this._personalRating > 0 && this._isAlreadyWatched) {
+      this.getElement().querySelector(`.film-details__watched-reset`).addEventListener(`click`, handler);
+    }
+  }
+
+  setAddPersonalRatingHandler(handler) {
+    this._personalRatingHandler = handler;
     if (this._isAlreadyWatched) {
-      const undoButton = this.getElement().querySelector(`.film-details__watched-reset`);
-      undoButton.addEventListener(`click`, (evt) => {
-        // debugger;
-        evt.preventDefault();
-        const activeScore = this.getElement().querySelector(`.film-details__user-rating-input:checked`);
-        if (!activeScore) {
-          return;
-        }
-        activeScore.checked = false;
-      });
+      this.getElement().querySelector(`.film-details__user-rating-score`).addEventListener(`click`, handler);
     }
   }
 
@@ -303,8 +297,11 @@ export default class PoupFilmCard extends AbstractSmartComponent {
     this._recoveryAddToWatchlistHandler();
     this._recoveryAddToFavoritesHandler();
     this._recoveryDeleteButtonHandler();
-    this._subscribeOnEmojiImgEvents();
-    this.setScoreButtonClickHandler();
+    this.subscribeOnEmojiImgEvents();
+
+    this.setUndoPersonalRatingHandler(this._undoPersonalRatingHandler);
+    this.setAddPersonalRatingHandler(this._personalRatingHandler);
+
   }
 
   _recoveryClosePopupHandler() {
@@ -328,7 +325,7 @@ export default class PoupFilmCard extends AbstractSmartComponent {
     deleteButtons.forEach((el) => el.addEventListener(`click`, this._deleteClickHandler));
   }
 
-  _subscribeOnEmojiImgEvents() {
+  subscribeOnEmojiImgEvents() {
     this.getElement().querySelector(`.film-details__emoji-list`).addEventListener(`change`, (evt) => {
       evt.preventDefault();
       this._emojiImg = EmojiImg[evt.target.value];

@@ -9,9 +9,9 @@ import MovieController from './movie-controller';
 
 const siteMainElement = document.querySelector(`.main`);
 
-const renderFilmCards = (filmListElement, films, onDataChange, onViewChange) => {
+const renderFilmCards = (filmListElement, films, onDataChange, onViewChange, api) => {
   return films.map((filmCard) => {
-    const movieController = new MovieController(filmListElement, onDataChange, onViewChange);
+    const movieController = new MovieController(filmListElement, onDataChange, onViewChange, api);
     movieController.render(filmCard);
 
     return movieController;
@@ -19,11 +19,12 @@ const renderFilmCards = (filmListElement, films, onDataChange, onViewChange) => 
 };
 
 export default class PageController {
-  constructor(container, films, stat) {
+  constructor(container, films, stat, api) {
+    this._api = api;
     this._cont = container;
     this._container = container.getElement();
     this._filmsContainer = this._container.querySelector(`.films-list__container`);
-    this._filmModel = films;
+    this._filmsModel = films;
     this._films = null;
     this._stat = stat;
     this._showMoreButtonComponent = new ShowMoreButtonComponent();
@@ -40,12 +41,12 @@ export default class PageController {
     this._onViewChange = this._onViewChange.bind(this);
     this._onFilterChange = this._onFilterChange.bind(this);
 
-    this._filmModel.setFilterClickHandler(this._onFilterChange);
+    this._filmsModel.setFilterClickHandler(this._onFilterChange);
   }
 
   render() {
     render(siteMainElement, this._sortComponent, RenderPosition.AFTERBEGIN);
-    this._navigationController = new NavigationController(siteMainElement, this._filmModel, this, this._stat);
+    this._navigationController = new NavigationController(siteMainElement, this._filmsModel, this, this._stat);
     this._navigationController.render();
 
     this._sortComponent.setSortTypeChangeHandler((filmSortType) => {
@@ -59,23 +60,23 @@ export default class PageController {
           sortedFilms = this._films.slice().sort((a, b) => b.rating - a.rating);
           break;
         case SortType.DEFAULT:
-          sortedFilms = this._filmModel.getFilmsAll();
+          sortedFilms = this._filmsModel.getFilmsAll();
           break;
       }
 
       this._filmsContainer.innerHTML = ``;
       this._films = sortedFilms;
-      const newFltredFilmCards = renderFilmCards(this._filmsContainer, this._films.slice(0, this._showingFilmCardCount), this._onDataChange, this._onViewChange);
+      const newFltredFilmCards = renderFilmCards(this._filmsContainer, this._films.slice(0, this._showingFilmCardCount), this._onDataChange, this._onViewChange, this._api);
 
       this._showedFilmCardControllers = this._showedFilmCardControllers.concat(newFltredFilmCards);
     });
-    this.renderFilms(this._filmModel.getFilmsAll());
+    this.renderFilms(this._filmsModel.getFilmsAll());
   }
 
   renderFilms(finalFilmList) {
     this._films = finalFilmList;
     this._filmsContainer.innerHTML = ``;
-    const newFilmCards = renderFilmCards(this._filmsContainer, this._films.slice(0, this._showingFilmCardCount), this._onDataChange, this._onViewChange);
+    const newFilmCards = renderFilmCards(this._filmsContainer, this._films.slice(0, this._showingFilmCardCount), this._onDataChange, this._onViewChange, this._api);
     this._showedFilmCardControllers = this._showedFilmCardControllers.concat(newFilmCards);
     this._renderShowMoreButton();
 
@@ -130,10 +131,10 @@ export default class PageController {
       } else {
         if (getFilmsCompareResult(allFilms, filterItem, firstFilm)) {
           const filtredFilms = getRandomExtraFilmCards();
-          renderFilmCards(extraCardPosition, filtredFilms, this._onDataChange, this._onViewChange);
+          renderFilmCards(extraCardPosition, filtredFilms, this._onDataChange, this._onViewChange, this._api);
         } else {
           const extraFilms = getExtraFilmCards(allFilms, filterItem);
-          renderFilmCards(extraCardPosition, extraFilms, this._onDataChange, this._onViewChange);
+          renderFilmCards(extraCardPosition, extraFilms, this._onDataChange, this._onViewChange, this._api);
         }
       }
     };
@@ -151,7 +152,7 @@ export default class PageController {
     this._showMoreButtonComponent.setShowMoreButtonClickHandler(() => {
       const previousFilmCardCount = this._showingFilmCardCount;
       this._showingFilmCardCount += FilmListCount.BY_BUTTON;
-      const newFilmCards = renderFilmCards(this._filmsContainer, this._films.slice(previousFilmCardCount, this._showingFilmCardCount), this._onDataChange, this._onViewChange);
+      const newFilmCards = renderFilmCards(this._filmsContainer, this._films.slice(previousFilmCardCount, this._showingFilmCardCount), this._onDataChange, this._onViewChange, this._api);
       this._showedFilmCardControllers = this._showedFilmCardControllers.concat(newFilmCards);
       if (this._showingFilmCardCount >= this._films.length) {
         remove(this._showMoreButtonComponent);
@@ -166,12 +167,25 @@ export default class PageController {
       const index = oldFilmComment.findIndex((el) => el.id === (oldFilmCard * 1));
       oldFilmComment.splice(index, 1);
       oldFilm.comments = oldFilmComment;
-      this._filmModel.updateFilm(oldFilm.id, oldFilm);
+      this._filmsModel.updateFilm(oldFilm.id, oldFilm);
       movieController.render(oldFilm);
     } else {
-      this._filmModel.updateFilm(newFilmCard.id, newFilmCard);
-      this._navigationController.rerender(this._films);
-      movieController.render(newFilmCard);
+
+      this._api.updateFilmCard(oldFilmCard.id, newFilmCard)
+        .then((updatedFilm) => {
+
+          const isSuccess = this._filmsModel.updateFilm(oldFilmCard.id, updatedFilm);
+
+          if (isSuccess) {
+
+            this._navigationController.rerender(this._films);
+
+            movieController.render(newFilmCard);
+          }
+        });
+      // this._filmsModel.updateFilm(newFilmCard.id, newFilmCard);
+      // this._navigationController.rerender(this._films);
+      // movieController.render(newFilmCard);
     }
   }
 
@@ -182,7 +196,7 @@ export default class PageController {
   }
 
   _onFilterChange() {
-    this.renderFilms(this._filmModel.getFilms());
+    this.renderFilms(this._filmsModel.getFilms());
   }
 
   hide() {

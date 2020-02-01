@@ -3,6 +3,7 @@ import FilmCardComponent from '../components/film-card';
 import PopupFilmCardComponent from '../components/popup';
 import {render, remove, replace} from '../utils/utils';
 import {getRandomArrayItem, usersNames} from '../mock/utils';
+import FilmModel from '../models/movie';
 
 const FilmCardMode = {
   DEFAULT: `default`,
@@ -10,8 +11,9 @@ const FilmCardMode = {
 };
 
 export default class MovieController {
-  constructor(container, onDataChange, onViewChange) {
+  constructor(container, onDataChange, onViewChange, api) {
     this._container = container;
+    this._api = api;
 
     this._onDataChange = onDataChange;
     this._onViewChange = onViewChange;
@@ -27,6 +29,8 @@ export default class MovieController {
     this._addToWatchedHandler = this._addToWatchedHandler.bind(this);
     this._addToFavoritesHandler = this._addToFavoritesHandler.bind(this);
     this._commentAddingPressHandler = this._commentAddingPressHandler.bind(this);
+    this._undoPersonalRatingHandler = this._undoPersonalRatingHandler.bind(this);
+    this._addPersonalRatingHandler = this._addPersonalRatingHandler.bind(this);
     this._deleteClickHandler = this._deleteClickHandler.bind(this);
   }
 
@@ -45,9 +49,8 @@ export default class MovieController {
     this._filmCard = filmCard;
     const oldFilmCardComponent = this._filmCardComponent;
     const oldPopupFilmCardComponent = this._popupFilmCardComponent;
-
-    this._filmCardComponent = this._createFilmCardComponent(this._filmCard);
-    this._popupFilmCardComponent = this._createPopupFilmCardComponent(this._filmCard);
+    this._filmCardComponent = this._createFilmCardComponent();
+    this._popupFilmCardComponent = this._createPopupFilmCardComponent();
 
     if (oldFilmCardComponent && oldPopupFilmCardComponent) {
       replace(this._filmCardComponent, oldFilmCardComponent);
@@ -55,12 +58,10 @@ export default class MovieController {
     } else {
       render(this._container, this._filmCardComponent);
     }
-
   }
 
-  _createFilmCardComponent(filmCard) {
-    const filmComponent = new FilmCardComponent(filmCard);
-
+  _createFilmCardComponent() {
+    const filmComponent = new FilmCardComponent(this._filmCard);
     filmComponent.setClickHandler(this._showPopupFilmCard);
     filmComponent.setAlreadyWatchedButtonClickHandler(this._addToWatchedHandler);
     filmComponent.setAddToWatchlistButtonClickHandler(this._addToWatchlistHandler);
@@ -69,8 +70,8 @@ export default class MovieController {
     return filmComponent;
   }
 
-  _createPopupFilmCardComponent(filmCard) {
-    const popupComponent = new PopupFilmCardComponent(filmCard);
+  _createPopupFilmCardComponent() {
+    const popupComponent = new PopupFilmCardComponent(this._filmCard);
     popupComponent.setClosePopupButtonClickHandler(() => {
       remove(this._popupFilmCardComponent);
       document.removeEventListener(`keydown`, this._commentAddingPressHandler);
@@ -79,19 +80,47 @@ export default class MovieController {
     popupComponent.setAlreadyWatchedButtonClickHandler(this._addToWatchedHandler);
     popupComponent.setAddToWatchlistButtonClickHandler(this._addToWatchlistHandler);
     popupComponent.setAddToFavoritesButtonClickHandler(this._addToFavoritesHandler);
+    popupComponent.setUndoPersonalRatingHandler(this._undoPersonalRatingHandler);
+    popupComponent.setAddPersonalRatingHandler(this._addPersonalRatingHandler);
     popupComponent.setDeleteButtonClickHandler(this._deleteClickHandler);
-    popupComponent.setScoreButtonClickHandler();
+    popupComponent.subscribeOnEmojiImgEvents();
+
 
     return popupComponent;
   }
 
   _showPopupFilmCard() {
     this._onViewChange();
-    this._filmCardMode = FilmCardMode.POPUP;
-    render(this._container, this._popupFilmCardComponent);
-    document.addEventListener(`keydown`, this._setEscButtonKeydownHandler);
-    this._popupFilmCardComponent.recoveryListeners();
-    document.addEventListener(`keydown`, this._commentAddingPressHandler);
+
+    this._api.getComments(this._filmCard.id)
+      .then((comments) => {
+
+        this._popupFilmCardComponent._comments = comments;
+        this._filmCardMode = FilmCardMode.POPUP;
+        render(this._container, this._popupFilmCardComponent);
+        document.addEventListener(`keydown`, this._setEscButtonKeydownHandler);
+        this._popupFilmCardComponent.recoveryListeners();
+        document.addEventListener(`keydown`, this._commentAddingPressHandler);
+      });
+  }
+
+  _undoPersonalRatingHandler() {
+
+    this._popupFilmCardComponent._personalRating = 0;
+    const newFilmCard = FilmModel.clone(this._filmCard);
+    newFilmCard.personalRating = this._popupFilmCardComponent._personalRating;
+    this._onDataChange(this, this._filmCard, newFilmCard);
+    // this._popupFilmCardComponent.rerender();
+  }
+
+  _addPersonalRatingHandler(evt) {
+    if (evt.target.value) {
+      const mark = evt.target.value;
+      this._popupFilmCardComponent._personalRating = mark * 1;
+      const newFilmCard = FilmModel.clone(this._filmCard);
+      newFilmCard.personalRating = this._popupFilmCardComponent._personalRating;
+      this._onDataChange(this, this._filmCard, newFilmCard);
+    }
   }
 
   _commentAddingPressHandler(evt) {
@@ -127,25 +156,30 @@ export default class MovieController {
   }
 
   _addToWatchlistHandler() {
+    const newFilmCard = FilmModel.clone(this._filmCard);
+    newFilmCard.isAddedToWatchlist = !this._filmCard.isAddedToWatchlist;
     this._onDataChange(
         this,
         this._filmCard,
-        Object.assign({}, this._filmCard, {isAddedToWatchlist: !this._filmCard.isAddedToWatchlist}));
+        newFilmCard);
   }
 
   _addToWatchedHandler() {
-    const watchedDate = this._popupFilmCardComponent.getIsAlreadyWatched() ? new Date() : null;
+    const newFilmCard = FilmModel.clone(this._filmCard);
+    newFilmCard.isAlreadyWatched = !this._filmCard.isAlreadyWatched;
     this._onDataChange(
         this,
         this._filmCard,
-        Object.assign({}, this._filmCard, {isAlreadyWatched: !this._popupFilmCardComponent.getIsAlreadyWatched(), whatchedDate: watchedDate}));
+        newFilmCard);
   }
 
   _addToFavoritesHandler() {
+    const newFilmCard = FilmModel.clone(this._filmCard);
+    newFilmCard.isFavorites = !this._filmCard.isFavorites;
     this._onDataChange(
         this,
         this._filmCard,
-        Object.assign({}, this._filmCard, {isFavorites: !this._filmCard.isFavorites}));
+        newFilmCard);
   }
 
   _deleteClickHandler(evt) {

@@ -1,53 +1,45 @@
-// Импортирование модулей
+import API from './api';
 import PageController from './controllers/film-board-controller';
-// import NavigationController from './controllers/navigation-controller';
 import FilmBoardComponent from './components/films';
 import NoFilmsComponent from './components/no-films';
 import ProfileRatingComponent from './components/profile-rating';
 import StatComponent from './components/stat';
-import {FilmListCount} from './const';
 import {render} from './utils/utils';
-import {getRandomIntegerNumber} from './mock/utils';
-import {generateFilmCards} from './mock/film-card';
-import Films from './models/movies';
+import FilmsModel from './models/movies';
 
-// поиск DOM элементов для навигации и основного контента
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=`;
+const END_POINT = `https://htmlacademy-es-10.appspot.com/cinemaddict/`;
+
+const api = new API(END_POINT, AUTHORIZATION);
 
 const siteHeaderElement = document.querySelector(`.header`);
 const siteMainElement = document.querySelector(`.main`);
 
-// Отрисовка ранга пользователя
+api.getFilmCards().then((filmCards) => {
 
-const filmViewedCount = getRandomIntegerNumber(0, 30);
+  if (filmCards.length === 0) {
+    render(siteMainElement, new NoFilmsComponent());
+  } else {
+    const filmsModel = new FilmsModel();
+    filmsModel.setFilms(filmCards);
+    const filmBoardComponent = new FilmBoardComponent();
+    render(siteMainElement, filmBoardComponent);
 
-if (filmViewedCount !== 0) {
-  render(siteHeaderElement, new ProfileRatingComponent(filmViewedCount));
-} else {
-  render(siteHeaderElement, new ProfileRatingComponent(filmViewedCount));
-  siteHeaderElement.querySelector(`.profile__rating`).remove();
-}
+    const statComponent = new StatComponent(filmsModel);
+    const pageController = new PageController(filmBoardComponent, filmsModel, statComponent, api);
+    pageController.render();
+    render(siteMainElement, statComponent);
 
-// Генерация набора карточек фильмов
+    const getFilmViewedCount = filmCards.filter((item) => item.isAlreadyWatched).length;
 
-const filmographies = generateFilmCards(FilmListCount.ALL);
-const films = new Films();
-films.setFilms(filmographies);
+    if (getFilmViewedCount !== 0) {
+      render(siteHeaderElement, new ProfileRatingComponent(getFilmViewedCount));
+    } else {
+      render(siteHeaderElement, new ProfileRatingComponent(getFilmViewedCount));
+      siteHeaderElement.querySelector(`.profile__rating`).remove();
+    }
 
-const statComponent = new StatComponent(films);
-
-if (FilmListCount.ALL === 0) {
-  render(siteMainElement, new NoFilmsComponent());
-} else {
-  const filmBoardComponent = new FilmBoardComponent();
-
-  render(siteMainElement, filmBoardComponent);
-
-  const pageController = new PageController(filmBoardComponent, films, statComponent);
-  pageController.render();
-  render(siteMainElement, statComponent);
-}
-
-// Указание общего количества фильмов в базе
-
-const footerFilmsStatisticElement = document.querySelector(`.footer__statistics > p`);
-footerFilmsStatisticElement.innerHTML = `${filmographies.length} movies inside`;
+    const footerFilmsStatisticElement = document.querySelector(`.footer__statistics > p`);
+    footerFilmsStatisticElement.innerHTML = `${filmCards.length} movies inside`;
+  }
+});

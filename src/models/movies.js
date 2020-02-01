@@ -42,9 +42,13 @@ export default class Films {
     const filmsData = [...this._films];
     const filmCardToChange = filmsData.find((item) => item.id === id);
     const indexFilm = filmsData.indexOf(filmCardToChange);
-    filmsData[indexFilm] = film;
-    this._films = filmsData;
-    this._dataChangeHandler();
+    if (indexFilm !== null) {
+      filmsData[indexFilm] = film;
+      this._films = filmsData;
+      this._dataChangeHandler();
+      return true;
+    }
+    return false;
   }
 
   setDataChangeHandler(handler) {

@@ -1,5 +1,5 @@
 import AbstractComponent from './abstract-component';
-import {createDescription, getFilmDuration} from '../utils/utils';
+import {getFilmDuration} from '../utils/utils';
 
 const getFullComment = (comment) => {
   const commentMulti = comment.length > 1 ? `comments` : `comment`;
@@ -8,11 +8,17 @@ const getFullComment = (comment) => {
 
 const createFilmCardETemplate = (film) => {
 
+
   const {title, rating, duration, releaseDate, genres, poster, description, comments, isAlreadyWatched, isAddedToWatchlist, isFavorites} = film;
   const commentFull = getFullComment(comments);
-  const fullDescription = createDescription(Array.from(description));
-  const getShortDescription = () => fullDescription.length > 140 ? `${fullDescription.slice(0, 140)} ...` : fullDescription;
-  const genreFilm = Array.from(genres);
+  const getShortDescription = () => description.length > 140 ? `${description.slice(0, 140)} ...` : description;
+  const getGenresFilm = Array.from(genres);
+  const getFirstGenre = () => {
+    if (getGenresFilm.length !== 0) {
+      return getGenresFilm[0];
+    }
+    return ``;
+  };
 
   return `<article class="film-card">
             <h3 class="film-card__title">${title}</h3>
@@ -20,7 +26,7 @@ const createFilmCardETemplate = (film) => {
             <p class="film-card__info">
               <span class="film-card__year">${releaseDate.getFullYear()}</span>
               <span class="film-card__duration">${getFilmDuration(duration)}</span>
-              <span class="film-card__genre">${genreFilm[0]}</span>
+              <span class="film-card__genre">${getFirstGenre()}</span>
             </p>
             <img src="${poster}" alt="" class="film-card__poster">
             <p class="film-card__description">${getShortDescription()}</p>
