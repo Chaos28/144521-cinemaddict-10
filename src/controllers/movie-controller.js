@@ -1,14 +1,15 @@
 import he from 'he';
 import FilmCardComponent from '../components/film-card';
 import PopupFilmCardComponent from '../components/popup';
-import {render, remove, replace} from '../utils/utils';
-import {getRandomArrayItem, usersNames} from '../mock/utils';
+import {render, remove, replace, RenderPosition} from '../utils/utils';
 import FilmModel from '../models/movie';
 
 const FilmCardMode = {
   DEFAULT: `default`,
   POPUP: `popup`
 };
+
+const SHAKE_ANIMATION_TIMEOUT = 700;
 
 export default class MovieController {
   constructor(container, onDataChange, onViewChange, api) {
@@ -22,6 +23,9 @@ export default class MovieController {
     this._filmCardMode = FilmCardMode.DEFAULT;
     this._filmCardComponent = null;
     this._popupFilmCardComponent = null;
+
+    this._isRatingChanging = false;
+    this._commentValue = null;
 
     this._showPopupFilmCard = this._showPopupFilmCard.bind(this);
     this._setEscButtonKeydownHandler = this._setEscButtonKeydownHandler.bind(this);
@@ -51,6 +55,9 @@ export default class MovieController {
     const oldPopupFilmCardComponent = this._popupFilmCardComponent;
     this._filmCardComponent = this._createFilmCardComponent();
     this._popupFilmCardComponent = this._createPopupFilmCardComponent();
+    if (this._popupFilmCardComponent) {
+      document.addEventListener(`keydown`, this._setEscButtonKeydownHandler);
+    }
 
     if (oldFilmCardComponent && oldPopupFilmCardComponent) {
       replace(this._filmCardComponent, oldFilmCardComponent);
@@ -72,18 +79,37 @@ export default class MovieController {
 
   _createPopupFilmCardComponent() {
     const popupComponent = new PopupFilmCardComponent(this._filmCard);
-    popupComponent.setClosePopupButtonClickHandler(() => {
-      remove(this._popupFilmCardComponent);
-      document.removeEventListener(`keydown`, this._commentAddingPressHandler);
-    });
+    this._api.getComments(this._filmCard.id)
+      .then((comments) => {
 
-    popupComponent.setAlreadyWatchedButtonClickHandler(this._addToWatchedHandler);
-    popupComponent.setAddToWatchlistButtonClickHandler(this._addToWatchlistHandler);
-    popupComponent.setAddToFavoritesButtonClickHandler(this._addToFavoritesHandler);
-    popupComponent.setUndoPersonalRatingHandler(this._undoPersonalRatingHandler);
-    popupComponent.setAddPersonalRatingHandler(this._addPersonalRatingHandler);
-    popupComponent.setDeleteButtonClickHandler(this._deleteClickHandler);
-    popupComponent.subscribeOnEmojiImgEvents();
+        this._popupFilmCardComponent._comments = comments;
+        popupComponent.setClosePopupButtonClickHandler(() => {
+          remove(this._popupFilmCardComponent);
+          document.removeEventListener(`keydown`, this._commentAddingPressHandler);
+        });
+
+        popupComponent.setAlreadyWatchedButtonClickHandler(this._addToWatchedHandler);
+        popupComponent.setAddToWatchlistButtonClickHandler(this._addToWatchlistHandler);
+        popupComponent.setAddToFavoritesButtonClickHandler(this._addToFavoritesHandler);
+        popupComponent.setUndoPersonalRatingHandler(this._undoPersonalRatingHandler);
+        popupComponent.setAddPersonalRatingHandler(this._addPersonalRatingHandler);
+        popupComponent.setDeleteButtonClickHandler(this._deleteClickHandler);
+        popupComponent.subscribeOnEmojiImgEvents();
+
+      });
+    // const popupComponent = new PopupFilmCardComponent(this._filmCard);
+    // popupComponent.setClosePopupButtonClickHandler(() => {
+    //   remove(this._popupFilmCardComponent);
+    //   document.removeEventListener(`keydown`, this._commentAddingPressHandler);
+    // });
+
+    // popupComponent.setAlreadyWatchedButtonClickHandler(this._addToWatchedHandler);
+    // popupComponent.setAddToWatchlistButtonClickHandler(this._addToWatchlistHandler);
+    // popupComponent.setAddToFavoritesButtonClickHandler(this._addToFavoritesHandler);
+    // popupComponent.setUndoPersonalRatingHandler(this._undoPersonalRatingHandler);
+    // popupComponent.setAddPersonalRatingHandler(this._addPersonalRatingHandler);
+    // popupComponent.setDeleteButtonClickHandler(this._deleteClickHandler);
+    // popupComponent.subscribeOnEmojiImgEvents();
 
 
     return popupComponent;
@@ -91,17 +117,11 @@ export default class MovieController {
 
   _showPopupFilmCard() {
     this._onViewChange();
-
-    this._api.getComments(this._filmCard.id)
-      .then((comments) => {
-
-        this._popupFilmCardComponent._comments = comments;
-        this._filmCardMode = FilmCardMode.POPUP;
-        render(this._container, this._popupFilmCardComponent);
-        document.addEventListener(`keydown`, this._setEscButtonKeydownHandler);
-        this._popupFilmCardComponent.recoveryListeners();
-        document.addEventListener(`keydown`, this._commentAddingPressHandler);
-      });
+    this._filmCardMode = FilmCardMode.POPUP;
+    render(document.body, this._popupFilmCardComponent, RenderPosition.BEFOREEND);
+    document.addEventListener(`keydown`, this._setEscButtonKeydownHandler);
+    this._popupFilmCardComponent.recoveryListeners();
+    document.addEventListener(`keydown`, this._commentAddingPressHandler);
   }
 
   _undoPersonalRatingHandler() {
@@ -110,15 +130,14 @@ export default class MovieController {
     const newFilmCard = FilmModel.clone(this._filmCard);
     newFilmCard.personalRating = this._popupFilmCardComponent._personalRating;
     this._onDataChange(this, this._filmCard, newFilmCard);
-    // this._popupFilmCardComponent.rerender();
   }
 
   _addPersonalRatingHandler(evt) {
     if (evt.target.value) {
+      this._isRatingChanging = true;
       const mark = evt.target.value;
-      this._popupFilmCardComponent._personalRating = mark * 1;
       const newFilmCard = FilmModel.clone(this._filmCard);
-      newFilmCard.personalRating = this._popupFilmCardComponent._personalRating;
+      newFilmCard.personalRating = mark * 1;
       this._onDataChange(this, this._filmCard, newFilmCard);
     }
   }
@@ -129,18 +148,22 @@ export default class MovieController {
     if ((evt.ctrlKey || evt.metaKey) && key === `Enter`) {
       const input = this._popupFilmCardComponent.getElement().querySelector(`.film-details__comment-input`).value;
       const encodedInput = he.encode(input);
+
       const imageAddress = this._popupFilmCardComponent.getElement().querySelector(`.film-details__add-emoji-img`).src.split(`/`);
       const image = imageAddress[imageAddress.length - 1];
       if (encodedInput.trim() !== ``) {
         const commentObj = {
-          userName: getRandomArrayItem(usersNames),
           comment: encodedInput,
-          date: new Date(),
-          emoji: image
+          date: new Date().toISOString(),
+          emotion: image.split(`.`).shift()
         };
-        this._popupFilmCardComponent.addComment(commentObj);
-        this._onDataChange(this, this._filmCard, Object.assign({}, this._filmCard, {comments: this._popupFilmCardComponent.getComments()}));
-        this._popupFilmCardComponent.rerender();
+
+        this._popupFilmCardComponent.setSending({
+          flag: true,
+          value: encodedInput
+        });
+        this._commentValue = encodedInput;
+        this._onDataChange(this, this._filmCard, commentObj, this._popupFilmCardComponent);
       }
     }
   }
@@ -165,8 +188,10 @@ export default class MovieController {
   }
 
   _addToWatchedHandler() {
+    const watchedDateNow = this._popupFilmCardComponent.getIsAlreadyWatched() ? new Date() : this._filmCard.watchedDate;
     const newFilmCard = FilmModel.clone(this._filmCard);
     newFilmCard.isAlreadyWatched = !this._filmCard.isAlreadyWatched;
+    newFilmCard.watchedDate = watchedDateNow;
     this._onDataChange(
         this,
         this._filmCard,
@@ -184,8 +209,36 @@ export default class MovieController {
 
   _deleteClickHandler(evt) {
     evt.preventDefault();
-    this._onDataChange(this, evt.target.dataset.id, null);
-    this._popupFilmCardComponent._comments = this._filmCard.comments;
-    this._popupFilmCardComponent.rerender();
+    this._onDataChange(this, evt.target.dataset.id, null, this._popupFilmCardComponent);
+  }
+
+  shakeComment() {
+    this._popupFilmCardComponent.getElement().querySelector(`.film-details__comment-input`).style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    this._popupFilmCardComponent.getElement().querySelector(`.film-details__comment-input`).style.border = `2px solid red`;
+    setTimeout(() => {
+      this._popupFilmCardComponent.getElement().querySelector(`.film-details__comment-input`).style.animation = ``;
+      this._popupFilmCardComponent.setSending({flag: false, value: this._commentValue});
+
+      this._popupFilmCardComponent.getElement().querySelector(`.film-details__comment-input`).style.border = `none`;
+      this._popupFilmCardComponent.getElement().querySelector(`.film-details__comment-input`).value = this._commentValue;
+    }, SHAKE_ANIMATION_TIMEOUT);
+  }
+
+  shakePersonalRating() {
+    this._popupFilmCardComponent.getElement().querySelector(`.film-details__user-rating-score`).style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    this._popupFilmCardComponent.getElement().querySelector(`.film-details__user-rating-score`).style.border = `2px solid red`;
+    setTimeout(() => {
+      this._popupFilmCardComponent.getElement().querySelector(`.film-details__user-rating-score`).style.animation = ``;
+      this._popupFilmCardComponent.rerender();
+
+      this._isRatingChanging = false;
+
+      this._popupFilmCardComponent.getElement().querySelector(`.film-details__user-rating-score`).style.border = `none`;
+    }, SHAKE_ANIMATION_TIMEOUT);
+  }
+
+  destroy() {
+    remove(this._filmCardComponent);
+    document.removeEventListener(`keydown`, this._setEscButtonKeydownHandler);
   }
 }

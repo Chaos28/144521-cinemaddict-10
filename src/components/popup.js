@@ -29,11 +29,12 @@ const renderComments = (commentsList) => {
   }).join(`\n`);
 };
 
-const createPopupFilmCardTemplate = (film, emojiImg, commentsList, isAlreadyWatched, isAddedToWatchlist, isFavorites, personalRating) => {
+const createPopupFilmCardTemplate = (film, emojiImg, commentsList, isAlreadyWatched, isAddedToWatchlist, isFavorites, personalRating, sendingObj) => {
 
   const {title, rating, releaseDate, duration, genres, poster, description, age, director, writers, actors, country} = film;
 
   const comments = commentsList;
+  const userRating = isAlreadyWatched ? personalRating : ``;
 
   const getFullReleaseDate = () => moment(releaseDate).format(`DD MMMM YYYY`);
 
@@ -115,6 +116,7 @@ const createPopupFilmCardTemplate = (film, emojiImg, commentsList, isAlreadyWatc
 
                   <div class="film-details__rating">
                     <p class="film-details__total-rating">${rating}</p>
+                    <p class="film-details__user-rating">Your rate ${userRating}</p>
                   </div>
                 </div>
 
@@ -184,7 +186,7 @@ const createPopupFilmCardTemplate = (film, emojiImg, commentsList, isAlreadyWatc
                 ${emojiImg ? `<img src="./images/emoji/${emojiImg}" width="55" height="55" class="film-details__add-emoji-img">` : ``}
                 </div>
                 <label class="film-details__comment-label">
-                  <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
+                  <textarea class="film-details__comment-input" placeholder="${sendingObj.value ? sendingObj.value : `Select reaction below and write comment here`}" name="comment" ${sendingObj.flag ? `disabled` : ``}></textarea>
                 </label>
 
                 <div class="film-details__emoji-list">
@@ -226,6 +228,10 @@ export default class PoupFilmCard extends AbstractSmartComponent {
     this._isFavorites = filmCard.isFavorites;
     this._personalRating = filmCard.personalRating;
     this._comments = [];
+    this._sendingObj = {
+      flag: false,
+      value: null
+    };
     this._personalRatingHandler = null;
     this._closeButtonHandler = null;
     this._alreadyWatchedButtonHandler = null;
@@ -240,41 +246,38 @@ export default class PoupFilmCard extends AbstractSmartComponent {
     return this._isAlreadyWatched;
   }
 
-  addComment(comment) {
-    this._comments.push(comment);
-  }
-
   getComments() {
     return this._comments;
   }
 
   getTemplate() {
-    return createPopupFilmCardTemplate(this._filmCard, this._emojiImg, this._comments, this._isAlreadyWatched, this._isAddedToWatchlist, this._isFavorites, this._personalRating);
+    return createPopupFilmCardTemplate(this._filmCard, this._emojiImg, this._comments, this._isAlreadyWatched, this._isAddedToWatchlist, this._isFavorites, this._personalRating, this._sendingObj);
   }
 
   setClosePopupButtonClickHandler(handler) {
     this._closeButtonHandler = handler;
-    this._recoveryClosePopupHandler();
+    this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, this._closeButtonHandler);
   }
 
   setAlreadyWatchedButtonClickHandler(handler) {
     this._alreadyWatchedButtonHandler = handler;
-    this._recoveryAlreadyWatchedHandler();
+    this.getElement().querySelector(`.film-details__control-label--watched`).addEventListener(`click`, this._alreadyWatchedButtonHandler);
   }
 
   setAddToWatchlistButtonClickHandler(handler) {
     this._addToWatchlistButtonHandler = handler;
-    this._recoveryAddToWatchlistHandler();
+    this.getElement().querySelector(`.film-details__control-label--watchlist`).addEventListener(`click`, this._addToWatchlistButtonHandler);
   }
 
   setAddToFavoritesButtonClickHandler(handler) {
     this._addToFavoritesButtonHandler = handler;
-    this._recoveryAddToFavoritesHandler();
+    this.getElement().querySelector(`.film-details__control-label--favorite`).addEventListener(`click`, this._addToFavoritesButtonHandler);
   }
 
   setDeleteButtonClickHandler(handler) {
     this._deleteClickHandler = handler;
-    this._recoveryDeleteButtonHandler();
+    const deleteButtons = this.getElement().querySelectorAll(`.film-details__comment-delete`);
+    deleteButtons.forEach((el) => el.addEventListener(`click`, this._deleteClickHandler));
   }
 
   setUndoPersonalRatingHandler(handler) {
@@ -291,45 +294,30 @@ export default class PoupFilmCard extends AbstractSmartComponent {
     }
   }
 
-  recoveryListeners() {
-    this._recoveryClosePopupHandler();
-    this._recoveryAlreadyWatchedHandler();
-    this._recoveryAddToWatchlistHandler();
-    this._recoveryAddToFavoritesHandler();
-    this._recoveryDeleteButtonHandler();
-    this.subscribeOnEmojiImgEvents();
-
-    this.setUndoPersonalRatingHandler(this._undoPersonalRatingHandler);
-    this.setAddPersonalRatingHandler(this._personalRatingHandler);
-
-  }
-
-  _recoveryClosePopupHandler() {
-    this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, this._closeButtonHandler);
-  }
-
-  _recoveryAlreadyWatchedHandler() {
-    this.getElement().querySelector(`.film-details__control-label--watched`).addEventListener(`click`, this._alreadyWatchedButtonHandler);
-  }
-
-  _recoveryAddToWatchlistHandler() {
-    this.getElement().querySelector(`.film-details__control-label--watchlist`).addEventListener(`click`, this._addToWatchlistButtonHandler);
-  }
-
-  _recoveryAddToFavoritesHandler() {
-    this.getElement().querySelector(`.film-details__control-label--favorite`).addEventListener(`click`, this._addToFavoritesButtonHandler);
-  }
-
-  _recoveryDeleteButtonHandler() {
-    const deleteButtons = this.getElement().querySelectorAll(`.film-details__comment-delete`);
-    deleteButtons.forEach((el) => el.addEventListener(`click`, this._deleteClickHandler));
-  }
-
   subscribeOnEmojiImgEvents() {
     this.getElement().querySelector(`.film-details__emoji-list`).addEventListener(`change`, (evt) => {
       evt.preventDefault();
       this._emojiImg = EmojiImg[evt.target.value];
       this.rerender();
     });
+  }
+
+  recoveryListeners() {
+    this.setClosePopupButtonClickHandler(this._closeButtonHandler);
+    this.setAlreadyWatchedButtonClickHandler(this._alreadyWatchedButtonHandler);
+    this.setAddToWatchlistButtonClickHandler(this._addToWatchlistButtonHandler);
+    this.setAddToFavoritesButtonClickHandler(this._addToFavoritesButtonHandler);
+    this.setDeleteButtonClickHandler(this._deleteClickHandler);
+    this.subscribeOnEmojiImgEvents();
+    this.setUndoPersonalRatingHandler(this._undoPersonalRatingHandler);
+    this.setAddPersonalRatingHandler(this._personalRatingHandler);
+  }
+
+  setSending(data) {
+    this._sendingObj = data;
+  }
+
+  resetPesonalRating() {
+    this._personalRating = 0;
   }
 }

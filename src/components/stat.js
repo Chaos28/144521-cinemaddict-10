@@ -14,25 +14,29 @@ const FilterStatType = {
 const getTodayWatchedData = (data) => {
   const endDate = moment();
   const startDate = endDate.startOf(`day`).toDate();
-  return data.filter((item) => item.whatchedDate > startDate);
+  const returningData = [...data];
+  return returningData.filter((item) => item.watchedDate > startDate);
 };
 
 const getWeekWatchedData = (data) => {
   const endDate = moment();
   const startDate = endDate.subtract(7, `d`);
-  return data.filter((item) => item.whatchedDate > startDate);
+  const returningData = [...data];
+  return returningData.filter((item) => item.watchedDate > startDate);
 };
 
 const getMonthWatchedData = (data) => {
   const endDate = moment();
   const startDate = endDate.subtract(30, `d`);
-  return data.filter((item) => item.whatchedDate > startDate);
+  const returningData = [...data];
+  return returningData.filter((item) => item.watchedDate > startDate);
 };
 
 const getYearWatchedData = (data) => {
   const endDate = moment();
   const startDate = endDate.subtract(365, `d`);
-  return data.filter((item) => item.whatchedDate > startDate);
+  const returningData = [...data];
+  return returningData.filter((item) => item.watchedDate > startDate);
 };
 
 const getSortedGenres = (data) => {

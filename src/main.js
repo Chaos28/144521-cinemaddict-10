@@ -7,7 +7,7 @@ import StatComponent from './components/stat';
 import {render} from './utils/utils';
 import FilmsModel from './models/movies';
 
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=`;
+const AUTHORIZATION = `Basic dXNlcckBwYXNzd29yZAo=`;
 const END_POINT = `https://htmlacademy-es-10.appspot.com/cinemaddict/`;
 
 const api = new API(END_POINT, AUTHORIZATION);
@@ -28,7 +28,7 @@ api.getFilmCards().then((filmCards) => {
     const statComponent = new StatComponent(filmsModel);
     const pageController = new PageController(filmBoardComponent, filmsModel, statComponent, api);
     pageController.render();
-    render(siteMainElement, statComponent);
+
 
     const getFilmViewedCount = filmCards.filter((item) => item.isAlreadyWatched).length;
 
@@ -38,6 +38,7 @@ api.getFilmCards().then((filmCards) => {
       render(siteHeaderElement, new ProfileRatingComponent(getFilmViewedCount));
       siteHeaderElement.querySelector(`.profile__rating`).remove();
     }
+    render(siteMainElement, statComponent);
 
     const footerFilmsStatisticElement = document.querySelector(`.footer__statistics > p`);
     footerFilmsStatisticElement.innerHTML = `${filmCards.length} movies inside`;

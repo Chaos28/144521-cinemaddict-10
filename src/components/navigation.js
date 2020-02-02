@@ -39,7 +39,6 @@ export default class Navigation extends AbstractComponent {
   setFiltersButtonClickHandler(handler) {
     const filterButtonClickHandler = (evt) => {
       evt.preventDefault();
-
       if (evt.target.tagName !== `A`) {
         return;
       }

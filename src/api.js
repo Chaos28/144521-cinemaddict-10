@@ -28,10 +28,6 @@ export default class API {
       .then(Film.parseFilmCards);
   }
 
-  // createFilmCardComment(filmCard) {
-
-  // }
-
   updateFilmCard(id, film) {
     return this._load({
       url: `movies/${id}`,
@@ -42,10 +38,6 @@ export default class API {
       .then((responce) => responce.json())
       .then(Film.parseFilmCard);
   }
-
-  // deleteFilmCardComment(id) {
-
-  // }
 
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {
     headers.append(`Authorization`, this._authorization);
@@ -60,5 +52,22 @@ export default class API {
     return this._load({url: `comments/${id}`})
       .then((responce) => responce.json())
       .then(Comment.parseComments);
+  }
+
+  createComment(id, comment) {
+    return this._load({
+      url: `comments/${id}`,
+      method: Method.POST,
+      body: JSON.stringify(comment),
+      headers: new Headers({'Content-type': `application/json`})
+    })
+      .then((responce) => responce.json());
+  }
+
+  deleteComment(id) {
+    return this._load({
+      url: `comments/${id}`,
+      method: Method.DELETE
+    });
   }
 }

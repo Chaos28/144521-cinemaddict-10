@@ -14,8 +14,4 @@ export default class Comment {
   static parseComments(film) {
     return film.map(Comment.parseComment);
   }
-
-  static parsePostResponce(film) {
-    return new Comment(film.comments.pop());
-  }
 }
