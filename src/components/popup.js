@@ -217,7 +217,7 @@ const createPopupFilmCardTemplate = (film, emojiImg, commentsList, isAlreadyWatc
       </section>`;
 };
 
-export default class PoupFilmCard extends AbstractSmartComponent {
+export default class Popup extends AbstractSmartComponent {
   constructor(filmCard) {
     super();
 

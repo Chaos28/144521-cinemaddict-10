@@ -94,8 +94,6 @@ export default class PageController {
     const filmListTopRatedElement = this._container.querySelector(`.top-rated .films-list__container`);
     const filmListMostCommentedElement = this._container.querySelector(`.most-commented .films-list__container`);
 
-    // Создание функции для сортировки и отрисовки карточек в Top Rated и Most Commented
-
     const getExtraFilmCards = (filmList, sortingElement, count = FilmListCount.EXTRA) => {
       return filmList.slice().sort((a, b) => {
         if (a[sortingElement] instanceof Array) {
@@ -105,18 +103,12 @@ export default class PageController {
       }).splice(0, count);
     };
 
-    // Создание функции для отрисовки случайных карточек в Top Rated и Most Commented (если комментарии/рейтинг одинаковые)
-
     const getRandomExtraFilmCards = this._films.slice().sort(() => {
       return 0.5 - Math.random();
     }).splice(0, FilmListCount.EXTRA);
 
-    // Сохранение числа комментариев и рейтинга для первых элементов списка карточек для сравнения
-
     const filmRatingFirst = this._films[0].rating;
     const filmCommentFirst = this._films[0].comments;
-
-    // Создание функции сравнения количества комментариев и рейтинга в списке карт
 
     const getFilmsCompareResult = (filmsBase, compareItem, firstItem) => {
       return filmsBase.every((item) => {
@@ -124,19 +116,13 @@ export default class PageController {
       });
     };
 
-    // Проверка на отсутствие комментариев к фильмам
-
     const getFiltredMostCommentedFilms = this._films.slice().filter((item) => {
       return item.comments === 0;
     });
 
-    // Проверка на отсутствие рейтинга у фильмов
-
     const getFiltredTopRatedFilms = this._films.filter((item) => {
       return item.rating === 0;
     });
-
-    // Функция Отрисовки карточек в Most Commented и Top Rated при соблюдении условий: нет комментариев/оценок, одинаковое количество, отсортированные комментарии/лценки
 
     const renderFiltredExtraFilmCards = (fitredExtraFilms, allFilms, extraElement, filterItem, firstFilm, extraCardPosition) => {
       let finalFilmCards;
@@ -176,46 +162,6 @@ export default class PageController {
       }
     });
   }
-
-  // _onDataChange(movieController, oldFilmCard, newFilmCard) {
-  //   this._api.updateFilmCard(oldFilmCard.id, newFilmCard)
-  //     .then((filmCardModel) => {
-  //       this._isSuccessDataChange(movieController, oldFilmCard, filmCardModel);
-  //     })
-  //       .catch(() => {
-  //         movieController.shakeComment();
-  //       });
-  // }
-
-  // _isSuccessDataChange(movieController, oldFilmCard, newFilmCard) {
-  //   const isSuccess = this._filmsModel.updateFilm(oldFilmCard.id, newFilmCard);
-
-  //   if (isSuccess) {
-  //     this._updateFilmCards(this._showingFilmCardCount);
-  //     movieController.render(newFilmCard);
-  //   }
-  // }
-
-  // _updateFilmCards() {
-  //   this._removeFilmCards();
-  //   this.renderFilms(this._filmsModel.getFilms());
-  // }
-
-  // _removeFilmCards() {
-  //   this._showedFilmCardControllers.forEach((item) => item.remove());
-  //   this._showedFilmCardControllers = [];
-
-  // }
-
-  // _isSuccessCommentDataAdd(movieController, oldFilmCard, newFilmCard) {
-
-  //   const isSuccessCardDataChange = this._filmsModel.updateFilm(oldFilmCard.id, newFilmCard);
-
-  //   if (isSuccessCardDataChange) {
-  //     this._updateFilmCards();
-  //     movieController.render(newFilmCard);
-  //   }
-  // }
 
   _onDataChange(movieController, oldFilmCard, newFilmCard, filmCardDetail = null) {
     if (newFilmCard === null) {

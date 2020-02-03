@@ -8,7 +8,6 @@ const createNoFilmsDataTemplate = () => {
           </section>`;
 };
 
-
 export default class NoFilms extends AbstractComponent {
   getTemplate() {
     return createNoFilmsDataTemplate();

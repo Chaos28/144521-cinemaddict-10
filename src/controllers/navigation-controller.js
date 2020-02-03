@@ -28,8 +28,6 @@ export default class NavigationController {
   }
 
   _onFilterChange(filterType) {
-    // this._model.setFilter(filterType);
-
     if (filterType === `stats`) {
       this._pageController.hide();
       this._stat.show();

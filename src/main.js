@@ -1,5 +1,5 @@
 import API from './api';
-import PageController from './controllers/film-board-controller';
+import PageController from './controllers/page-controller';
 import FilmBoardComponent from './components/films';
 import NoFilmsComponent from './components/no-films';
 import ProfileRatingComponent from './components/profile-rating';
@@ -7,7 +7,7 @@ import StatComponent from './components/stat';
 import {render} from './utils/utils';
 import FilmsModel from './models/movies';
 
-const AUTHORIZATION = `Basic dXNlcckBwYXNzd29yZAo=`;
+const AUTHORIZATION = `Basic dXNlcdfBwYXNzd29yZAo=`;
 const END_POINT = `https://htmlacademy-es-10.appspot.com/cinemaddict/`;
 
 const api = new API(END_POINT, AUTHORIZATION);

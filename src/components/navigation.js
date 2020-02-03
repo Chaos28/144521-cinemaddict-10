@@ -30,8 +30,8 @@ export default class Navigation extends AbstractComponent {
     super();
 
     this._allFilmsCard = allFilmsCard;
-
   }
+
   getTemplate() {
     return createNavigationListTemplate(this._allFilmsCard);
   }
