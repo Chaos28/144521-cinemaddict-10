@@ -11,45 +11,45 @@ const FilterStatType = {
   YEAR: `year`
 };
 
-const getTodayWatchedData = (data) => {
+const getTodayWatchedFilms = (filmCards) => {
   const endDate = moment();
   const startDate = endDate.startOf(`day`).toDate();
-  const returningData = [...data];
-  return returningData.filter((item) => item.watchedDate > startDate);
+  const returningFilmCards = [...filmCards];
+  return returningFilmCards.filter((item) => item.watchedDate > startDate);
 };
 
-const getWeekWatchedData = (data) => {
+const getWeekWatchedFilms = (filmCards) => {
   const endDate = moment();
   const startDate = endDate.subtract(7, `d`);
-  const returningData = [...data];
-  return returningData.filter((item) => item.watchedDate > startDate);
+  const returningFilmCards = [...filmCards];
+  return returningFilmCards.filter((item) => item.watchedDate > startDate);
 };
 
-const getMonthWatchedData = (data) => {
+const getMonthWatchedFilms = (filmCards) => {
   const endDate = moment();
   const startDate = endDate.subtract(30, `d`);
-  const returningData = [...data];
-  return returningData.filter((item) => item.watchedDate > startDate);
+  const returningFilmCards = [...filmCards];
+  return returningFilmCards.filter((item) => item.watchedDate > startDate);
 };
 
-const getYearWatchedData = (data) => {
+const getYearWatchedFilms = (filmCards) => {
   const endDate = moment();
   const startDate = endDate.subtract(365, `d`);
-  const returningData = [...data];
-  return returningData.filter((item) => item.watchedDate > startDate);
+  const returningFilmCards = [...filmCards];
+  return returningFilmCards.filter((item) => item.watchedDate > startDate);
 };
 
-const getSortedGenres = (data) => {
+const getSortedGenres = (genres) => {
   const uniqueGenres = new Set();
   const allGenres = [];
 
-  data.forEach((item) => [...item.genres].forEach((element) => {
+  genres.forEach((item) => [...item.genres].forEach((element) => {
     uniqueGenres.add(element);
     allGenres.push(element);
   })
   );
 
-  const genresMap = [...uniqueGenres].map((element1) => {
+  const genresMaps = [...uniqueGenres].map((element1) => {
     let genreCount = 0;
     allGenres.forEach((element2) => (element2 === element1 ? genreCount++ : ``));
 
@@ -59,11 +59,11 @@ const getSortedGenres = (data) => {
     };
   });
 
-  return genresMap.sort((a, b) => b.count - a.count);
+  return genresMaps.sort((a, b) => b.count - a.count);
 };
 
-const renderChart = (data) => {
-  const genres = getSortedGenres(data);
+const renderChart = (filmCards) => {
+  const genres = getSortedGenres(filmCards);
 
   const ctx = document.querySelector(`.statistic__chart`).getContext(`2d`);
   const myChart = new Chart(ctx, {
@@ -141,12 +141,12 @@ const getProfileRating = () => {
   return profile;
 };
 
-const createStatTemplate = (data) => {
-  const sortedByGenre = getSortedGenres(data);
+const createStatTemplate = (filmCards) => {
+  const sortedByGenre = getSortedGenres(filmCards);
   const topGenre = sortedByGenre[0] ? sortedByGenre[0].genre : `-`;
-  const whatchedCount = data.length;
+  const whatchedCount = filmCards.length;
 
-  const totalFilmDuration = moment.duration(data.reduce((accumulator, element) => accumulator + element.duration, 0));
+  const totalFilmDuration = moment.duration(filmCards.reduce((accumulator, element) => accumulator + element.duration, 0));
 
   return `<section class="statistic visually-hidden">
             <p class="statistic__rank">
@@ -213,20 +213,20 @@ export default class Stat extends AbstractComponent {
   _setFilterData(filter) {
     switch (filter) {
       case FilterStatType.TODAY:
-        this._filteredFilms = getTodayWatchedData(this._model.getFilmsAll().filter((item) => item.isAlreadyWatched));
+        this._filteredFilms = getTodayWatchedFilms(this._model.getFilmsAll().filter((item) => item.isAlreadyWatched));
         this._filterType = FilterStatType.TODAY;
         break;
       case FilterStatType.WEEK:
-        this._filteredFilms = getWeekWatchedData(this._model.getFilmsAll().filter((item) => item.isAlreadyWatched));
+        this._filteredFilms = getWeekWatchedFilms(this._model.getFilmsAll().filter((item) => item.isAlreadyWatched));
         this._filterType = FilterStatType.WEEK;
         break;
       case FilterStatType.MONTH:
-        this._filteredFilms = getMonthWatchedData(this._model.getFilmsAll().filter((item) => item.isAlreadyWatched));
+        this._filteredFilms = getMonthWatchedFilms(this._model.getFilmsAll().filter((item) => item.isAlreadyWatched));
         this._filterType = FilterStatType.MONTH;
         this.rerender();
         break;
       case FilterStatType.YEAR:
-        this._filteredFilms = getYearWatchedData(this._model.getFilmsAll().filter((item) => item.isAlreadyWatched));
+        this._filteredFilms = getYearWatchedFilms(this._model.getFilmsAll().filter((item) => item.isAlreadyWatched));
         this._filterType = FilterStatType.YEAR;
         break;
       default:

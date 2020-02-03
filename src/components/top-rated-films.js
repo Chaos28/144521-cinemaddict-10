@@ -7,7 +7,7 @@ const createTopRatedTemplate = () => {
           </section>`;
 };
 
-export default class TopRated extends AbstractComponent {
+export default class TopRatedFilms extends AbstractComponent {
   getTemplate() {
     return createTopRatedTemplate();
   }

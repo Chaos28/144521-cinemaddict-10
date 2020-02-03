@@ -146,7 +146,7 @@ export default class MovieController {
           emotion: image.split(`.`).shift()
         };
 
-        this._popupFilmCardComponent.setSending({
+        this._popupFilmCardComponent.setSendData({
           flag: true,
           value: encodedInput
         });
@@ -205,7 +205,7 @@ export default class MovieController {
     this._popupFilmCardComponent.getElement().querySelector(`.film-details__comment-input`).style.border = `2px solid red`;
     setTimeout(() => {
       this._popupFilmCardComponent.getElement().querySelector(`.film-details__comment-input`).style.animation = ``;
-      this._popupFilmCardComponent.setSending({flag: false, value: this._commentValue});
+      this._popupFilmCardComponent.setSendData({flag: false, value: this._commentValue});
 
       this._popupFilmCardComponent.getElement().querySelector(`.film-details__comment-input`).style.border = `none`;
       this._popupFilmCardComponent.getElement().querySelector(`.film-details__comment-input`).value = this._commentValue;

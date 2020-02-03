@@ -1,4 +1,4 @@
-export default class Film {
+export default class Movie {
   constructor(film) {
     this.id = film[`id`];
     this.comments = film[`comments`] || ``;
@@ -54,14 +54,14 @@ export default class Film {
   }
 
   static parseFilmCard(film) {
-    return new Film(film);
+    return new Movie(film);
   }
 
   static parseFilmCards(film) {
-    return film.map(Film.parseFilmCard);
+    return film.map(Movie.parseFilmCard);
   }
 
   static clone(film) {
-    return new Film(film.toRAW());
+    return new Movie(film.toRAW());
   }
 }

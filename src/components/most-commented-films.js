@@ -7,7 +7,7 @@ const createMostCommentedTemplate = () => {
           </section>`;
 };
 
-export default class MoastCommented extends AbstractComponent {
+export default class MostCommentedFilms extends AbstractComponent {
   getTemplate() {
     return createMostCommentedTemplate();
   }

@@ -11,9 +11,8 @@ const Method = {
 const checkStatus = (responce) => {
   if (responce.status >= 200 && responce.status < 300) {
     return responce;
-  } else {
-    throw new Error(`${responce.status}: ${responce.statusText}`);
   }
+  throw new Error(`${responce.status}: ${responce.statusText}`);
 };
 
 export default class API {

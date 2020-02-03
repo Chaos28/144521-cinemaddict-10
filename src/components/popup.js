@@ -89,9 +89,9 @@ const createPopupFilmCardTemplate = (film, emojiImg, commentsList, isAlreadyWatc
                 </div>
               </section>
             </div>`;
-    } else {
-      return ``;
     }
+
+    return ``;
   };
 
   return `<section class="film-details">
@@ -313,7 +313,7 @@ export default class Popup extends AbstractSmartComponent {
     this.setAddPersonalRatingHandler(this._personalRatingHandler);
   }
 
-  setSending(data) {
+  setSendData(data) {
     this._sendingObj = data;
   }
 

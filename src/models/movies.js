@@ -1,6 +1,6 @@
 import {FilterType} from '../utils/utils';
 
-export default class Films {
+export default class Movies {
   constructor() {
     this._films = [];
     this._dataChangeHandler = null;
@@ -42,13 +42,10 @@ export default class Films {
     const filmsData = [...this._films];
     const filmCardToChange = filmsData.find((item) => item.id === id);
     const indexFilm = filmsData.indexOf(filmCardToChange);
-    if (indexFilm !== null) {
-      filmsData[indexFilm] = film;
-      this._films = filmsData;
-      this._dataChangeHandler();
-      return true;
-    }
-    return false;
+    filmsData[indexFilm] = film;
+    this._films = filmsData;
+    this._dataChangeHandler();
+    return true;
   }
 
   setDataChangeHandler(handler) {
