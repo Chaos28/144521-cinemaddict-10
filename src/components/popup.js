@@ -313,8 +313,8 @@ export default class Popup extends AbstractSmartComponent {
     this.setAddPersonalRatingHandler(this._personalRatingHandler);
   }
 
-  setSendData(data) {
-    this._sendingObj = data;
+  setSendData(FilmComment) {
+    this._sendingObj = FilmComment;
   }
 
   resetPesonalRating() {
